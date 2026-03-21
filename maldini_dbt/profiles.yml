@@ -1,0 +1,10 @@
+maldini_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: maldinia
+      dataset: dbt_dev
+      location: EU
+      threads: 4

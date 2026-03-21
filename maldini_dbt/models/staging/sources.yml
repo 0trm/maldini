@@ -1,0 +1,30 @@
+version: 2
+
+sources:
+  - name: raw
+    database: maldinia
+    schema: raw
+    tables:
+      - name: transcripts
+        description: One row per YouTube video ingested
+        columns:
+          - name: video_id
+            tests: [not_null, unique]
+          - name: video_url
+            tests: [not_null]
+
+      - name: predictions_extracted
+        description: One row per prediction extracted by Claude from a transcript
+        columns:
+          - name: prediction_id
+            tests: [not_null, unique]
+          - name: video_id
+            tests: [not_null]
+
+      - name: match_results
+        description: One row per scored match result from TheSportsDB
+        columns:
+          - name: result_id
+            tests: [not_null, unique]
+          - name: prediction_id
+            tests: [not_null]
