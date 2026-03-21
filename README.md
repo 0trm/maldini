@@ -12,7 +12,7 @@ Maldini is one of Spain's most prominent football journalists. Every week on his
 
 ## The Question
 
-A Brier score measures the accuracy of probabilistic predictions — **lower is better**, 0 is perfect.
+A Brier score measures the accuracy of probabilistic predictions -- **lower is better**, 0 is perfect.
 
 | Benchmark | Brier Score |
 |---|---|
@@ -21,7 +21,7 @@ A Brier score measures the accuracy of probabilistic predictions — **lower is 
 | **Superforecaster threshold** | **< 0.20** |
 | Perfect forecaster | 0.00 |
 
-Maldini earns the superforecaster badge only when his all-time average Brier score drops below 0.20 — and only once he has 100+ scored predictions for statistical reliability. The project currently tracks **1,400+ predictions** from 2022-Q4 onwards.
+Maldini earns the superforecaster badge only when his all-time average Brier score drops below 0.20 -- and only once he has 100+ scored predictions for statistical reliability. The project currently tracks **1,400+ predictions** from 2022-Q4 onwards.
 
 ---
 
@@ -57,9 +57,9 @@ dbt (maldini_dbt/)             staging → intermediate → marts
 Dashboard (FastAPI + BigQuery) Served on Google Cloud Run
 ```
 
-**BigQuery is the single source of truth.** All tables live in the `maldinia` GCP project. Raw tables are append-only — if transformation logic changes, fix the dbt SQL and re-run; the raw data is always intact.
+**BigQuery is the single source of truth.** All tables live in the `maldinia` GCP project. Raw tables are append-only -- if transformation logic changes, fix the dbt SQL and re-run; the raw data is always intact.
 
-Orchestration: **Dagster** — asset-based dependency graph, daily schedule at 08:00 UTC, inbox sensor that triggers the full pipeline when a new video CSV is dropped.
+Orchestration: **Dagster** -- asset-based dependency graph, daily schedule at 08:00 UTC, inbox sensor that triggers the full pipeline when a new video CSV is dropped.
 
 ---
 
@@ -79,7 +79,7 @@ marts/
   fct_predictions              One row per prediction with Brier score
   mart_monthly_scores          Monthly rolling averages
   mart_competition_summary     Scores broken down by competition
-  mart_scores_summary          All-time summary — feeds the dashboard headline
+  mart_scores_summary          All-time summary -- feeds the dashboard headline
 ```
 
 Brier score variants:
@@ -121,7 +121,7 @@ gcloud auth application-default login
 dagster dev   # UI at http://localhost:3000
 ```
 
-Drop a CSV with a `video_url` column into `data/inbox/` — the inbox sensor detects it within ~60s and runs the full pipeline automatically.
+Drop a CSV with a `video_url` column into `data/inbox/` -- the inbox sensor detects it within ~60s and runs the full pipeline automatically.
 
 ### Manual
 
@@ -149,12 +149,12 @@ uvicorn src.dashboard.web_app:app --reload   # http://localhost:8000
 
 ## Design Notes
 
-- **Raw tables are immutable** — `WRITE_APPEND` only; fix the dbt SQL, not the source data.
-- **No-draw handling** — when `pred_draw_pct == 0`, a 2-outcome Brier formula is applied automatically in `fct_predictions`.
-- **Fuzzy team matching** — normalisation strips accents, common prefixes (`Real`, `Atlético`), and applies Spanish→English word substitutions before substring matching.
-- **No-date window** — predictions without a `match_date` use a 45-day window from `publish_date` to find the matching fixture.
-- **Dashboard cache** — BigQuery results cached for 10 minutes; refreshes automatically after `dbt run` with no redeploy needed.
-- **Data scope** — 2022-Q4 onwards; earlier data excluded due to quality and availability.
+- **Raw tables are immutable** -- `WRITE_APPEND` only; fix the dbt SQL, not the source data.
+- **No-draw handling** -- when `pred_draw_pct == 0`, a 2-outcome Brier formula is applied automatically in `fct_predictions`.
+- **Fuzzy team matching** -- normalisation strips accents, common prefixes (`Real`, `Atlético`), and applies Spanish→English word substitutions before substring matching.
+- **No-date window** -- predictions without a `match_date` use a 45-day window from `publish_date` to find the matching fixture.
+- **Dashboard cache** -- BigQuery results cached for 10 minutes; refreshes automatically after `dbt run` with no redeploy needed.
+- **Data scope** -- 2022-Q4 onwards; earlier data excluded due to quality and availability.
 
 ---
 
