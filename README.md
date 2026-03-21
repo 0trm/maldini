@@ -17,7 +17,7 @@ A Brier score measures the accuracy of probabilistic predictions -- **lower is b
 | Benchmark | Brier Score |
 |---|---|
 | Naive baseline (guess 1/3 each outcome) | 0.222 |
-| Typical football bookmaker | ~0.19 |
+| Betting markets | ~0.19 |
 | **Superforecaster threshold** | **< 0.20** |
 | Perfect forecaster | 0.00 |
 
@@ -57,9 +57,9 @@ dbt (maldini_dbt/)             staging → intermediate → marts
 Dashboard (FastAPI + BigQuery) Served on Google Cloud Run
 ```
 
-**BigQuery is the single source of truth.** All tables live in the `maldinia` GCP project. Raw tables are append-only -- if transformation logic changes, fix the dbt SQL and re-run; the raw data is always intact.
+**BigQuery is the single source of truth.** All tables live in a GCP project. Raw tables are append-only -- if transformation logic changes, fix the dbt SQL and re-run; the raw data is always intact.
 
-Orchestration: **Dagster** -- asset-based dependency graph, daily schedule at 08:00 UTC, inbox sensor that triggers the full pipeline when a new video CSV is dropped.
+Orchestration: **Dagster** -- asset-based dependency graph, daily schedule at 08:00 UTC, sensor that triggers the full pipeline when a new video CSV is dropped.
 
 ---
 
@@ -92,7 +92,7 @@ Brier score variants:
 
 | Layer | Technology |
 |---|---|
-| Orchestration | [Dagster](https://dagster.io) |
+| Orchestration | Dagster|
 | Data warehouse | Google BigQuery |
 | Transformations | dbt |
 | Transcript ingestion | YouTube Data API v3, youtube-transcript-api |
