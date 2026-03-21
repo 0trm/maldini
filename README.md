@@ -4,7 +4,9 @@
 
 Maldini is one of Spain's most prominent football journalists. Every week on his YouTube channel [@mundomaldini](https://www.youtube.com/@mundomaldini) he makes explicit, probabilistic predictions about upcoming matches. This project captures every prediction, scores it objectively with a [Brier score](https://en.wikipedia.org/wiki/Brier_score), and surfaces the answer in a live dashboard.
 
-**→ [Live dashboard](https://maldini-stats-797074457864.us-central1.run.app)**
+**→ [Live dashboard](https://maldini-stats-797074457864.us-central1.run.app/?lang=en)**
+
+<img width="600" height="600" alt="image" src="https://github.com/user-attachments/assets/b185e906-7ed7-48fa-9d46-8748153aa911" />
 
 ---
 
