@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>maldini-stats</title>
+  <style>
+    :root {
+      --bg: #ffffff; --fg: #111111;
+      --blue: #0033cc; --magenta: #AC8053; --bar: #D9C4B0; --orange: #EE7733;
+      --hl-border: #0077BB; --hl-bg: rgba(0,119,187,0.07);
+    }
+    :root[data-dark] {
+      --bg: #111111; --fg: #dddddd;
+      --blue: #4499ff; --magenta: #AC8053; --bar: #D9C4B0; --orange: #FFAA44;
+      --hl-border: #44AAFF; --hl-bg: rgba(68,170,255,0.08);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      padding: 1.5rem 3rem 3rem 3rem;
+      overflow-x: auto;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 0.75rem 1rem 1.5rem 1rem; }
+      html, body { font-size: 11px; }
+    }
+
+    .controls-row {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 2ch;
+      margin-bottom: 0.4rem;
+    }
+
+    .controls-row a {
+      color: var(--blue);
+      text-decoration: none;
+      font-size: 13px;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    .controls-row a:hover {
+      text-decoration: underline;
+    }
+
+    #dark-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--blue);
+      padding: 0;
+      font-family: inherit;
+      line-height: 1;
+    }
+
+    .doc {
+      white-space: pre;
+      display: block;
+      width: fit-content;
+      margin: 0;
+      padding: 0;
+      color: var(--fg);
+    }
+
+    .doc b {
+      font-weight: bold;
+      color: var(--fg);
+    }
+
+    .c-blue    { color: var(--blue); }
+    .c-magenta { color: var(--magenta); }
+    .c-bar     { color: var(--bar); }
+    .c-orange  { color: var(--orange); }
+
+    .muted { color: var(--blue); }
+
+    .hl {
+      display: inline-block;
+      border-left: 3px solid var(--hl-border);
+      background: var(--hl-bg);
+      padding-left: 6px;
+      margin-left: -6px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="controls-row">
+  <a href="/?lang={{ 'es' if lang == 'en' else 'en' }}">{{ 'ES' if lang == 'en' else 'EN' }}</a>
+  <button id="dark-toggle" onclick="toggleDark()">&#x263E;</button>
+</div>
+
+{% for name in ["header", "summary", "competition", "quarterly", "recent", "definitions", "footer"] %}
+<div class="doc">{{ sections[name] | join('<br>') }}</div>
+{% endfor %}
+
+<script>
+  function toggleDark() {
+    const on = document.documentElement.toggleAttribute('data-dark');
+    document.getElementById('dark-toggle').textContent = on ? '\u2600' : '\u263E';
+    localStorage.setItem('dark', on ? '1' : '');
+  }
+  if (localStorage.getItem('dark')) {
+    document.documentElement.setAttribute('data-dark', '');
+    document.getElementById('dark-toggle').textContent = '\u2600';
+  }
+</script>
+
+</body>
+</html>
