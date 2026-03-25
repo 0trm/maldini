@@ -5,7 +5,6 @@ for the Maldini Stats dashboard.
 Both terminal_app.py (Streamlit) and cli_app.py (CLI) import from here.
 """
 
-import math
 import re
 from datetime import datetime
 
@@ -66,13 +65,22 @@ def load(credentials=None):
         f"ORDER BY publish_date DESC LIMIT 15"
     ).to_dataframe()
 
+    all_brier = (
+        bq.query(
+            f"SELECT brier_score FROM `{MARTS}.fct_predictions` "
+            f"WHERE brier_score IS NOT NULL"
+        )
+        .to_dataframe()["brier_score"]
+        .tolist()
+    )
+
     avg_brier = summary["all_time_avg_brier"]
     std_brier = std_row["std_brier"]
     accuracy  = summary["accuracy_pct"]
     is_sf     = summary["is_superforecaster"]
     total     = summary["total_predictions"]
 
-    return recent, avg_brier, std_brier, accuracy, is_sf, quarterly, comp, total
+    return recent, avg_brier, std_brier, accuracy, is_sf, quarterly, comp, total, all_brier
 
 
 # ── pure text helpers ─────────────────────────────────────────────────────────
@@ -115,124 +123,6 @@ def colored_brier(v: float, fmt) -> str:
 
 def tsep(*col_widths: int, prefix: str = "  ") -> str:
     return prefix + "─┼─".join("─" * w for w in col_widths)
-
-
-def gauge(value: float, fmt, *, width: int = 20, max_val: float = 0.30,
-          threshold: float = 0.20) -> list[str]:
-    """Horizontal gauge: ├████████░░░░░░░░░░┤ with threshold marker."""
-    filled = min(width, int(value / max_val * width))
-    thr_pos = int(threshold / max_val * width)
-    row = list("█" * filled + "░" * (width - filled))
-    # place threshold marker
-    if 0 <= thr_pos < width:
-        row[thr_pos] = "┊"
-    gauge_str = "├" + "".join(row) + "┤"
-
-    # scale labels aligned under the gauge
-    scale = " " * 1  # under ├
-    thr_label = ".20"
-    end_label = f".{int(max_val * 100):02d}"
-    # positions: 0 under first char, thr_pos under threshold, width under last
-    scale_line = list(" " * (width + 2))  # +2 for ├ and ┤
-    scale_line[0] = "0"
-    # place .20 centered on thr_pos+1 (offset by ├)
-    thr_start = max(1, thr_pos + 1 - len(thr_label) // 2)
-    for i, ch in enumerate(thr_label):
-        if thr_start + i < len(scale_line):
-            scale_line[thr_start + i] = ch
-    # place max label at end
-    end_start = max(0, len(scale_line) - len(end_label))
-    for i, ch in enumerate(end_label):
-        if end_start + i < len(scale_line):
-            scale_line[end_start + i] = ch
-
-    return [gauge_str, "".join(scale_line)]
-
-
-def vbar_chart(labels: list[str], values: list[float], fmt, *,
-               threshold: float = 0.20, bar_w: int = 2, gap: int = 2,
-               step: float = 0.02, threshold_label: str = "threshold") -> list[str]:
-    """Vertical bar chart with Y-axis, threshold line, and colored bars."""
-    if not values:
-        return []
-
-    # dynamic Y range: snap to step grid
-    y_min = math.floor((min(values) - step) / step) * step
-    y_max = math.ceil((max(values) + step) / step) * step
-    y_min = max(0, y_min)
-
-    # number of rows
-    n_rows = round((y_max - y_min) / step)
-    col_w = bar_w + gap  # each column occupies bar_w + gap chars
-    chart_w = len(values) * col_w + gap  # total chart body width
-
-    lines = []
-    for row_i in range(n_rows, -1, -1):
-        y_val = y_min + row_i * step
-        is_threshold = abs(y_val - threshold) < step / 2
-
-        # Y-axis label
-        label = f"  {y_val:.2f} ┤" if row_i > 0 else f"       └"
-
-        # build row content
-        row_chars = []
-        for vi, v in enumerate(values):
-            bar_bottom = y_min
-            bar_top = v
-            cell_bottom = y_val
-            cell_top = y_val + step
-
-            if row_i == 0:
-                # bottom axis line
-                row_chars.append("─" * col_w)
-            elif cell_bottom < bar_top and cell_top > bar_bottom and cell_bottom >= y_min:
-                # this cell is within the bar
-                bar_str = "█" * bar_w
-                if v > threshold:
-                    bar_str = fmt.color(bar_str, "bar")
-                # pad with threshold line or spaces
-                if is_threshold:
-                    row_chars.append(bar_str + "·" * gap)
-                else:
-                    row_chars.append(bar_str + " " * gap)
-            else:
-                # empty cell
-                if is_threshold:
-                    row_chars.append("·" * col_w)
-                else:
-                    row_chars.append(" " * col_w)
-
-        row_body = " " * gap + "".join(row_chars)
-
-        if row_i == 0:
-            # bottom axis
-            row_body = "─" * (chart_w + gap)
-
-        # append threshold label
-        if is_threshold and row_i > 0:
-            row_body = row_body.rstrip() + " " + threshold_label
-
-        lines.append(label + row_body)
-
-    # X-axis labels (two lines: quarter name, year)
-    x_line1 = "        "  # align under chart
-    x_line2 = "        "
-    for lbl in labels:
-        # expect format like "2023-Q1" → show "Q1" / "'23"
-        parts = lbl.split("-") if "-" in lbl else [lbl, ""]
-        if len(parts) == 2 and parts[1].startswith("Q"):
-            q_part = parts[1]  # "Q1"
-            y_part = f"'{parts[0][2:]}"  # "'23"
-        else:
-            q_part = lbl[:4]
-            y_part = ""
-        x_line1 += f"{q_part:<{col_w}}"
-        x_line2 += f"{y_part:<{col_w}}"
-
-    lines.append(x_line1.rstrip())
-    lines.append(x_line2.rstrip())
-
-    return lines
 
 
 # ── fmt contract ──────────────────────────────────────────────────────────────
@@ -310,15 +200,13 @@ def build_translations(avg_brier, std_brier, fmt):
                 ("Accuracy %",     "% where top predicted outcome == actual result."),
                 ("Scored",         "Result confirmed in TheSportsDB; match played."),
             ],
-            "vbar_title":  "Quarterly Brier Scores",
-            "best_qtr":    "Best quarter  ",
-            "worst_qtr":   "Worst quarter ",
-            "active_since":"Active since  ",
-            "threshold_lbl":"threshold",
-            "legend":       fmt.color("■", "bar") + f" {gt} 0.20",
             "colors":      "Colors:",
             "last_upd":    "last updated",
             "author":      "author      ",
+            "dist_title":  "Brier distribution  (n={n}, mean={mean}, std={std}):",
+            "dist_std_lo": "mean\u2500\u03c3",
+            "dist_mean":   "mean",
+            "dist_std_hi": "mean+\u03c3",
         },
         "es": {
             "header": [
@@ -373,22 +261,20 @@ def build_translations(avg_brier, std_brier, fmt):
                 ("Precisión %",      "% donde el resultado más probable coincide con real."),
                 ("Puntuada",         "Resultado confirmado en TheSportsDB; partido jugado."),
             ],
-            "vbar_title":  "Puntuaciones trimestrales Brier",
-            "best_qtr":    "Mejor trimestre",
-            "worst_qtr":   "Peor trimestre ",
-            "active_since":"Activo desde   ",
-            "threshold_lbl":"umbral",
-            "legend":       fmt.color("■", "bar") + f" {gt} 0.20",
             "colors":      "Colores:",
             "last_upd":    "actualizado    ",
             "author":      "autor          ",
+            "dist_title":  "Distribución Brier  (n={n}, media={mean}, desv={std}):",
+            "dist_std_lo": "media\u2500\u03c3",
+            "dist_mean":   "media",
+            "dist_std_hi": "media+\u03c3",
         },
     }
 
 
 # ── section builder ───────────────────────────────────────────────────────────
 def build_sections(T, fmt, df_scored, avg_brier, std_brier, accuracy,
-                   is_sf, monthly, comp, total):
+                   is_sf, monthly, comp, total, all_brier):
     """Build all report sections as lists of formatted strings.
 
     Returns a dict: section_name -> list[str].
@@ -405,51 +291,91 @@ def build_sections(T, fmt, df_scored, avg_brier, std_brier, accuracy,
         rule(),
     ]
 
-    # ── summary (gauge + two-column stats) ─────────────────────────────
+    # ── summary ───────────────────────────────────────────────────────────
     sf_box = T["sf_yes"] if is_sf else T["sf_no"]
-
-    # derive best / worst quarter
-    best_idx  = monthly["avg_brier"].idxmin()
-    worst_idx = monthly["avg_brier"].idxmax()
-    best_qtr  = monthly.loc[best_idx, "month"]
-    worst_qtr = monthly.loc[worst_idx, "month"]
-    first_qtr = monthly.iloc[0]["month"]
-
-    # gauge lines
-    g_lines = gauge(avg_brier, fmt)
-
-    # two-column layout: left = Brier gauge, right = stats
-    _col_w = 30
-    left_lines = [
-        f'  {T["brier"]}: {fmt.bold(colored_brier(avg_brier, fmt))}',
-        f'    {g_lines[0]}',
-        f'    {g_lines[1]}',
-        "",
-        f'  {T["std"]}: {std_brier:.3f}',
-    ]
-    right_lines = [
+    _stat_lines = [
         f'{T["scored"]}: {fmt.bold(str(total))}',
         f'{T["accuracy"]}: {fmt.bold(f"{accuracy}%")}',
-        f'{T["best_qtr"]}: {fmt.color(str(best_qtr), "blue")}',
-        f'{T["worst_qtr"]}: {fmt.color(str(worst_qtr), "magenta")}',
-        f'{T["active_since"]}: {first_qtr}',
+        f'{T["brier"]}: {fmt.bold(colored_brier(avg_brier, fmt))}',
+        f'{T["std"]}: {std_brier:.3f}',
     ]
-
+    _bm_lines = [
+        T["benchmarks"],
+        f'  {T["naive"]:<17}: {BENCHMARKS["naive_baseline"]}',
+        f'  {T["markets"]:<17}: {BENCHMARKS["bookmaker"]}',
+        f'  {T["maldini"]:<17}: {fmt.bold(f"{avg_brier:.4f}")}',
+    ]
+    _col_w = 30
     summary = [
         fmt.highlight(sf_box),
         thin(),
+        *[f'{s}{" " * (_col_w - _vis_len(s))} | {b}' for s, b in zip(_stat_lines, _bm_lines)],
+        rule(),
     ]
-    for l_line, r_line in zip(left_lines, right_lines):
-        pad = _col_w - _vis_len(l_line)
-        summary.append(f'{l_line}{" " * max(1, pad)} {r_line}')
 
-    # benchmarks below
-    summary.append(thin())
-    summary.append(f'  {T["benchmarks"]}')
-    summary.append(f'    {T["naive"]:<17}: {BENCHMARKS["naive_baseline"]}')
-    summary.append(f'    {T["markets"]:<17}: {BENCHMARKS["bookmaker"]}')
-    summary.append(f'    {T["maldini"]:<17}: {fmt.bold(f"{avg_brier:.4f}")}')
-    summary.append(rule())
+    # ── distribution ──────────────────────────────────────────────────────
+    _BIN_W  = 0.025
+    _D_LO, _D_HI = 0.0, 0.375
+    _N_BINS = int((_D_HI - _D_LO) / _BIN_W)
+
+    _dcounts = [0] * _N_BINS
+    for _v in all_brier:
+        if _v is not None:
+            _i = min(_N_BINS - 1, max(0, int((_v - _D_LO) / _BIN_W)))
+            _dcounts[_i] += 1
+    while _dcounts and _dcounts[-1] == 0:
+        _dcounts.pop()
+
+    _n_all   = len(all_brier)
+    _max_cnt = max(_dcounts) if _dcounts else 1
+    _DBAR_W  = 24
+    _actual_hi = _D_LO + len(_dcounts) * _BIN_W
+    _ruler_hi  = max(_actual_hi, avg_brier + std_brier + _BIN_W)
+    _RULER_W   = W - 4
+
+    def _rpos(v):
+        return max(0, min(_RULER_W - 1,
+                          round((v - _D_LO) / (_ruler_hi - _D_LO) * (_RULER_W - 1))))
+
+    def _place(arr, ctr, text):
+        s = max(0, min(ctr - len(text) // 2, len(arr) - len(text)))
+        for _j, _c in enumerate(text):
+            arr[s + _j] = _c
+
+    _dist_title = T["dist_title"].format(
+        n=_n_all, mean=f"{avg_brier:.4f}", std=f"{std_brier:.3f}"
+    )
+    distribution = [fmt.bold(_dist_title), thin()]
+    for _i, _cnt in enumerate(_dcounts):
+        _lo_v   = _D_LO + _i * _BIN_W
+        _hi_v   = _lo_v + _BIN_W
+        _filled = int(_cnt / _max_cnt * _DBAR_W)
+        _b      = "█" * _filled + "░" * (_DBAR_W - _filled)
+        _pct    = _cnt / _n_all * 100 if _n_all > 0 else 0
+        distribution.append(
+            f"  {_lo_v:.3f}\u2500{_hi_v:.3f} \u2502 {_cnt:>4} ({_pct:4.1f}%) {_b}"
+        )
+
+    _slo_p = _rpos(avg_brier - std_brier)
+    _m_p   = _rpos(avg_brier)
+    _shi_p = _rpos(avg_brier + std_brier)
+    _ruler = list("\u2500" * _RULER_W)
+    _ruler[_slo_p] = "["
+    _ruler[_m_p]   = "\u256a"
+    _ruler[_shi_p] = "]"
+    distribution.append(f"  {''.join(_ruler)}")
+
+    _vals  = list(" " * _RULER_W)
+    _names = list(" " * _RULER_W)
+    _place(_vals,  _slo_p, f"{avg_brier - std_brier:.3f}")
+    _place(_vals,  _m_p,   f"{avg_brier:.4f}")
+    _place(_vals,  _shi_p, f"{avg_brier + std_brier:.3f}")
+    _place(_names, _slo_p, T["dist_std_lo"])
+    _place(_names, _m_p,   T["dist_mean"])
+    _place(_names, _shi_p, T["dist_std_hi"])
+    distribution.append(f"  {''.join(_vals)}")
+    distribution.append(f"  {''.join(_names)}")
+    distribution.append(rule())
 
     # ── competition breakdown ─────────────────────────────────────────────
     competition = [
@@ -464,31 +390,32 @@ def build_sections(T, fmt, df_scored, avg_brier, std_brier, accuracy,
         name  = fmt.escape(row["competition"])[:22]
         b     = bar(brier, width=16)
         competition.append(
-            f"  {name:<22} │ {colored_brier(brier, fmt)} │ {b} │ {n} ({pct:.1f}%)"
+            f"  {name:<22} │ {brier:.4f} │ {b} │ {n} ({pct:.1f}%)"
         )
     competition.append(rule())
 
-    # ── quarterly scores (vertical bar chart) ──────────────────────────
+    # ── quarterly scores ──────────────────────────────────────────────────
     spark_str = "".join(spark(m["avg_brier"]) for _, m in monthly.iterrows())
     q_vals    = monthly["avg_brier"].tolist()
-    q_labels  = monthly["month"].tolist()
     recent_3  = q_vals[-3:] if len(q_vals) >= 3 else q_vals
     trend_label = T["improving"] if recent_3[-1] < recent_3[0] else T["worsening"]
 
-    chart_lines = vbar_chart(
-        [str(l) for l in q_labels], q_vals, fmt,
-        threshold_label=T["threshold_lbl"],
-    )
-
     quarterly = [
-        fmt.bold(T["vbar_title"]),
-        "",
-        *chart_lines,
-        "",
-        f'  {T["legend"]}',
-        f'  {fmt.muted(f"{T['trend']} {spark_str}  {trend_label}")}',
-        rule(),
+        fmt.bold(T["qtr_title"]),
+        f'  {T["qtr_col"]:<9} │ {"Brier":>6} │ {"Bar":<20} │ n (%total)',
+        thin(),
     ]
+    for _, m in monthly.iterrows():
+        b   = bar(m["avg_brier"], width=20)
+        pct = m["n"] / total * 100
+        quarterly.append(
+            f"  {m['month']:<9} │ {m['avg_brier']:.4f} │ {b} │"
+            f" {int(m['n'])} ({pct:.1f}%)"
+        )
+    quarterly.append(
+        f'  {fmt.muted(f"{T['trend']} {spark_str}  {trend_label}")}'
+    )
+    quarterly.append(rule())
 
     # ── recent predictions ────────────────────────────────────────────────
     recent = [
@@ -525,7 +452,7 @@ def build_sections(T, fmt, df_scored, avg_brier, std_brier, accuracy,
     _colors_term = T["colors"].rstrip(":")
     _colors_padded = fmt.underline(_colors_term) + " " * (15 - len(_colors_term))
     definitions.append(
-        f'  {_colors_padded}: {fmt.color("■", "magenta")} highlighted {gt} 0.20'
+        f'  {_colors_padded}: {fmt.color("■", "magenta")} magenta = Brier {gt} 0.20 (summary)'
     )
     definitions.append("")
 
@@ -538,11 +465,12 @@ def build_sections(T, fmt, df_scored, avg_brier, std_brier, accuracy,
     ]
 
     return {
-        "header":      header,
-        "summary":     summary,
-        "competition": competition,
-        "quarterly":   quarterly,
-        "recent":      recent,
-        "definitions": definitions,
-        "footer":      footer,
+        "header":       header,
+        "summary":      summary,
+        "distribution": distribution,
+        "competition":  competition,
+        "quarterly":    quarterly,
+        "recent":       recent,
+        "definitions":  definitions,
+        "footer":       footer,
     }

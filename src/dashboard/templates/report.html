@@ -7,12 +7,12 @@
   <style>
     :root {
       --bg: #ffffff; --fg: #111111;
-      --blue: #0033cc; --magenta: #AC8053; --bar: #D9C4B0; --orange: #EE7733;
+      --blue: #0033cc; --magenta: #AA3377; --orange: #AA3377;
       --hl-border: #0077BB; --hl-bg: rgba(0,119,187,0.07);
     }
     :root[data-dark] {
       --bg: #111111; --fg: #dddddd;
-      --blue: #4499ff; --magenta: #AC8053; --bar: #D9C4B0; --orange: #FFAA44;
+      --blue: #4499ff; --magenta: #EE66AA; --orange: #EE66AA;
       --hl-border: #44AAFF; --hl-bg: rgba(68,170,255,0.08);
     }
 
@@ -107,7 +107,7 @@
   <button id="dark-toggle" onclick="toggleDark()">&#x263E;</button>
 </div>
 
-{% for name in ["header", "summary", "competition", "quarterly", "recent", "definitions", "footer"] %}
+{% for name in ["header", "summary", "distribution", "competition", "quarterly", "recent", "definitions", "footer"] %}
 <div class="doc">{{ sections[name] | join('<br>') }}</div>
 {% endfor %}
 

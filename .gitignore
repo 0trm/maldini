@@ -1,9 +1,6 @@
 # Environment
 .env
 
-# Streamlit secrets (never commit — use secrets.toml.example as template)
-.streamlit/secrets.toml
-
 # Transcript inbox (CSVs are transient — not committed)
 data/inbox/*.csv
 

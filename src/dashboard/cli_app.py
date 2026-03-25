@@ -29,7 +29,7 @@ class _AnsiFmt:
 
     _COLORS = {
         "blue":    "38;5;33",    # ~#0077BB
-        "orange":  "38;5;208",   # ~#EE7733
+        "orange":  "38;5;127",   # → magenta
         "magenta": "38;5;127",   # ~#AA3377
     }
 
@@ -69,14 +69,14 @@ def main():
 
     fmt  = _AnsiFmt(enabled=use_color)
     data = load()
-    df_scored, avg_brier, std_brier, accuracy, is_sf, monthly, comp, total = data
+    df_scored, avg_brier, std_brier, accuracy, is_sf, monthly, comp, total, all_brier = data
 
     TR = build_translations(avg_brier, std_brier, fmt)
     T  = TR[args.lang]
 
     sections = build_sections(T, fmt, *data)
 
-    for name in ("header", "summary", "competition", "quarterly",
+    for name in ("header", "summary", "distribution", "competition", "quarterly",
                  "recent", "definitions", "footer"):
         for line in sections[name]:
             print(line)

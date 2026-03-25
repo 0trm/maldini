@@ -96,7 +96,7 @@ st.markdown(
 
 
 # ── HTML formatting adapter ──────────────────────────────────────────────────
-_COLORS = {"blue": GREEN, "magenta": RED, "orange": AMBER}
+_COLORS = {"blue": GREEN, "magenta": RED, "orange": RED}
 
 
 class _HtmlFmt:
@@ -152,7 +152,7 @@ def cached_load():
 
 # ── build & render report ─────────────────────────────────────────────────────
 data = cached_load()
-df_scored, avg_brier, std_brier, accuracy, is_sf, monthly, comp, total = data
+df_scored, avg_brier, std_brier, accuracy, is_sf, monthly, comp, total, all_brier = data
 
 fmt = _HtmlFmt()
 TR  = build_translations(avg_brier, std_brier, fmt)
@@ -162,6 +162,6 @@ T   = TR[lang]
 sections = build_sections(T, fmt, *data)
 sections["footer"][-1] = '<span style="font-size:1.8em;">\U0001f41f</span>'
 
-for name in ("header", "summary", "competition", "quarterly",
+for name in ("header", "summary", "distribution", "competition", "quarterly",
              "recent", "definitions", "footer"):
     render(sections[name])
