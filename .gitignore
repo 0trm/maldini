@@ -4,6 +4,17 @@
 # Transcript inbox (CSVs are transient — not committed)
 data/inbox/*.csv
 
+# macOS
+.DS_Store
+
+# Editor / IDE / agent local config
+.claude/
+.idea/
+.vscode/
+
+# dbt per-user identity (random UUID, no consumer value)
+maldini_dbt/.user.yml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

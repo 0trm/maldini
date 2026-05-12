@@ -6,7 +6,7 @@ Maldini is one of Spain's most prominent football journalists. Every week on his
 
 
 
-**→ [Live dashboard](https://maldini-stats-797074457864.us-central1.run.app/?lang=en)**
+**→ [Live dashboard](https://0trm.blog/maldini-stats/)**
 
 ---
 
@@ -27,64 +27,43 @@ Maldini earns the superforecaster badge only when his all-time average Brier sco
 
 ## Architecture
 
-![System Context Diagram](docs/ms-scd.png)
-
 ```
-YouTube URL
-    │
-    ▼
-ingest_transcripts.py          YouTube Data API v3 → video metadata
-    │                          youtube-transcript-api → Spanish transcript
-    ▼
-raw.transcripts (BigQuery)     One row per video
-    │
-    ▼
-extract_predictions.py         Claude Haiku reads transcript, extracts structured predictions
-    │                          (home/away teams, competition, home/draw/away %)
-    ▼
-raw.predictions_extracted      One row per prediction (20 columns)
-    │
-    ▼
-fetch_results.py               TheSportsDB API → actual match scorelines
-    │                          Fuzzy team matching, 45-day window for undated predictions
-    ▼
-raw.match_results              One row per scored result
-    │
-    ▼
-dbt (maldini_dbt/)             staging → intermediate → marts
-    │                          Brier score computed here
-    ▼
-Dashboard (FastAPI + BigQuery) Served on Google Cloud Run
+data/videos.csv  ──┐
+                   ▼
+              ┌──────────────┐
+              │ pipeline.py  │  fetch transcript      (youtube-transcript-api)
+              │              │  extract predictions   (Claude Haiku)
+              │              │  fetch match results   (TheSportsDB)
+              │              │  compute Brier scores  (DuckDB SQL)
+              └──────┬───────┘
+                     ▼
+       data/predictions.parquet   (one row per scored prediction)
+                     │
+                     ▼
+              ┌──────────────┐
+              │ render.py    │  summary stats   (DuckDB SQL)
+              │              │  bilingual HTML  (Jinja2, EN/ES)
+              └──────┬───────┘
+                     ▼
+              dist/index.html   →   served by GitHub Pages
 ```
 
-**BigQuery is the single source of truth.** All tables live in a GCP project. Raw tables are append-only -- if transformation logic changes, fix the dbt SQL and re-run; the raw data is always intact.
+**Parquet is the single source of truth.** It lives in git, so every dashboard build is reproducible from a commit hash. `pipeline.py` is idempotent -- re-running it on the same `videos.csv` only processes new `video_id`s.
 
-Orchestration: **Dagster** -- asset-based dependency graph, daily schedule at 08:00 UTC, sensor that triggers the full pipeline when a new video CSV is dropped.
+Schedule: **GitHub Actions** runs a weekly cron (Sundays 08:00 UTC) that executes the pipeline + render and commits the artifacts back to `main`. GitHub Pages auto-publishes `dist/`. No infrastructure to maintain.
 
 ---
 
-## dbt Models
+## Transformation
 
-```
-staging/
-  stg_transcripts              Clean video metadata
-  stg_predictions              Typed, validated prediction rows
-  stg_match_results            Normalised match scorelines
-
-intermediate/
-  int_predictions_with_legs    Explodes multi-leg predictions into individual rows
-  int_predictions_matched      Joins predictions to match results
-
-marts/
-  fct_predictions              One row per prediction with Brier score
-  mart_monthly_scores          Monthly rolling averages
-  mart_competition_summary     Scores broken down by competition
-  mart_scores_summary          All-time summary -- feeds the dashboard headline
-```
+All SQL runs in **DuckDB** in-process, embedded inside `pipeline.py` (scoring) and `render.py` (summary stats). No warehouse, no credentials, no quotas.
 
 Brier score variants:
-- **3-outcome** (home / draw / away) for regular matches
-- **2-outcome** (home / away) for knockout matches where `pred_draw_pct = 0`
+
+- **3-outcome** (league matches): `((p_home - I_home)² + (p_draw - I_draw)² + (p_away - I_away)²) / 3`
+- **2-outcome** (knockout, where `pred_draw_pct = 0`): renormalise home + away to sum to 1, then `((p_home - I_home)² + (p_away - I_away)²) / 2`
+
+Summary statistics (all-time average, accuracy, monthly trend, competition breakdown, Brier distribution) are computed by `render.py` from the parquet at render time -- a few short CTEs, no separate materialised tables.
 
 ---
 
@@ -92,69 +71,64 @@ Brier score variants:
 
 | Layer | Technology |
 |---|---|
-| Orchestration | Dagster|
-| Data warehouse | Google BigQuery |
-| Transformations | dbt |
-| Transcript ingestion | YouTube Data API v3, youtube-transcript-api |
-| Prediction extraction | Anthropic Claude Haiku |
-| Match results | TheSportsDB API |
-| Dashboard | FastAPI + Jinja2, deployed on Google Cloud Run |
+| Pipeline | Python (`pipeline.py`) |
+| Transformations | DuckDB (in-process SQL) |
+| Storage | Parquet file in git (`data/predictions.parquet`) |
+| LLM | Anthropic Claude Haiku |
+| External APIs | YouTube Data API v3, youtube-transcript-api, TheSportsDB |
+| Dashboard | Jinja2 → static HTML |
+| Schedule | GitHub Actions (weekly cron) |
+| Hosting | GitHub Pages |
 
 ---
 
 ## How to Run Locally
+
+For a full step-by-step guide, see [docs/SETUP.md](docs/SETUP.md). The summary below is enough to get going.
 
 ### Prerequisites
 
 ```bash
 git clone https://github.com/tomas-ravalli/maldini-stats.git
 cd maldini-stats
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
+uv venv && source .venv/bin/activate
+uv pip install -r requirements.txt
 cp .env.example .env   # fill in YOUTUBE_API_KEY and ANTHROPIC_API_KEY
-gcloud auth application-default login
 ```
 
-### Automated (Dagster)
+### Run
 
 ```bash
-dagster dev   # UI at http://localhost:3000
+# 1. Ingest, extract, fetch results, score
+python pipeline.py --file data/videos.csv
+
+# 2. Generate static HTML from the parquet
+python render.py
+
+# 3. View
+open dist/index.html
 ```
 
-Drop a CSV with a `video_url` column into `data/inbox/` -- the inbox sensor detects it within ~60s and runs the full pipeline automatically.
-
-### Manual
-
-```bash
-# 1. Ingest transcript
-python src/ingest/ingest_transcripts.py --file data/inbox/videos.csv
-
-# 2. Extract predictions via Claude Haiku
-python src/extractor/extract_predictions.py
-
-# 3. Fetch match results from TheSportsDB
-python src/results/fetch_results.py
-
-# 4. Run dbt
-cd maldini_dbt && dbt run
-```
-
-### Dashboard
-
-```bash
-uvicorn src.dashboard.web_app:app --reload   # http://localhost:8000
-```
+To add new videos: append rows to `data/videos.csv` and re-run.
 
 ---
 
 ## Design Notes
 
-- **Raw tables are immutable** -- `WRITE_APPEND` only; fix the dbt SQL, not the source data.
-- **No-draw handling** -- when `pred_draw_pct == 0`, a 2-outcome Brier formula is applied automatically in `fct_predictions`.
-- **Fuzzy team matching** -- normalisation strips accents, common prefixes (`Real`, `Atlético`), and applies Spanish→English word substitutions before substring matching.
+- **Parquet lives in git** -- every dashboard build is reproducible from a commit hash. If scoring logic changes, rebuild from `data/videos.csv`.
+- **DuckDB for everything SQL** -- no warehouse, no credentials, no quotas; the whole pipeline runs on a laptop or a free-tier GitHub Actions runner in under a minute.
+- **Fuzzy team matching** -- normalisation strips accents, common prefixes (`Real`, `Atlético`), and applies Spanish→English word substitutions before substring matching against TheSportsDB results.
 - **No-date window** -- predictions without a `match_date` use a 45-day window from `publish_date` to find the matching fixture.
-- **Dashboard cache** -- BigQuery results cached for 10 minutes; refreshes automatically after `dbt run` with no redeploy needed.
+- **No-draw handling** -- when `pred_draw_pct == 0`, a 2-outcome Brier formula is applied automatically.
 - **Data scope** -- 2022-Q4 onwards; earlier data excluded due to quality and availability.
+
+---
+
+## Documentation
+
+- [docs/SETUP.md](docs/SETUP.md) -- step-by-step local setup and verification
+- [docs/DATA_FORMAT.md](docs/DATA_FORMAT.md) -- input/output schemas for the pipeline
+- [CONTRIBUTING.md](CONTRIBUTING.md) -- coding conventions and where to add new logic
 
 ---
 
