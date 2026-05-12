@@ -2,9 +2,9 @@
 
 Maldini is one of Spain's most prominent football journalists. Every week on his YouTube channel [@mundomaldini](https://www.youtube.com/@mundomaldini) he makes explicit, probabilistic predictions about upcoming matches. This project captures every prediction, scores it objectively with a [Brier score](https://en.wikipedia.org/wiki/Brier_score), and surfaces the answer in a live dashboard.
 
-<img width="775" alt="maldini-youtube" src="https://github.com/user-attachments/assets/87c6d194-7d76-4261-be76-b031587856e7" />
-
 **→ [Live dashboard](https://0trm.blog/maldini-stats/)**
+
+<img width="775" alt="maldini-youtube" src="https://github.com/user-attachments/assets/87c6d194-7d76-4261-be76-b031587856e7" />
 
 ---
 
@@ -19,7 +19,9 @@ A Brier score measures the accuracy of probabilistic predictions – **lower is 
 | **Superforecaster threshold** | **< 0.20** |
 | Perfect forecaster | 0.00 |
 
-Maldini earns the superforecaster badge only when his all-time average Brier score drops below 0.20 – and only once he has 100+ scored predictions for statistical reliability. The project currently tracks **1,400+ predictions** from 2022-Q4 onwards.
+Maldini earns the superforecaster badge only when his all-time average Brier score drops below 0.20 – and only once he has 100+ scored predictions for statistical reliability. 
+
+> The project tracks **1,500 predictions** from 2022-Q4 to 2026-Q2.
 
 ---
 
