@@ -1,9 +1,6 @@
 # Environment
 .env
 
-# Transcript inbox (CSVs are transient — not committed)
-data/inbox/*.csv
-
 # macOS
 .DS_Store
 
@@ -12,8 +9,8 @@ data/inbox/*.csv
 .idea/
 .vscode/
 
-# dbt per-user identity (random UUID, no consumer value)
-maldini_dbt/.user.yml
+# Pipeline scratch
+data/predictions.parquet.tmp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -27,7 +24,6 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -90,7 +86,6 @@ docs/_build/
 
 # PyBuilder
 .pybuilder/
-target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
