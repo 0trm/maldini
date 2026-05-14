@@ -28,29 +28,42 @@ Maldini earns the superforecaster badge only when his all-time average Brier sco
 ## Architecture
 
 ```
-data/videos.csv  ──┐
-                   ▼
-              ┌─────────────────────┐
-              │ maldini.pipeline    │  fetch transcript      (youtube-transcript-api)
-              │                     │  extract predictions   (Claude Haiku)
-              │                     │  fetch match results   (TheSportsDB)
-              │                     │  compute Brier scores  (DuckDB SQL)
-              └──────┬──────────────┘
-                     ▼
-       data/predictions.parquet   (one row per scored prediction)
-                     │
-                     ▼
-              ┌─────────────────────┐
-              │ maldini.render      │  summary stats   (DuckDB SQL)
-              │                     │  bilingual HTML  (Jinja2, EN/ES)
-              └──────┬──────────────┘
-                     ▼
-              dist/index.html   →   served by GitHub Pages
+                ┌──────────────────────────────────┐
+                │  data/videos.csv                 │
+                │  data/results_overrides.csv  (*) │
+                └─────────────────┬────────────────┘
+                                  ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                       maldini.pipeline                          │
+│                                                                 │
+│    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐     │
+│    │ ingest  │───►│ extract │───►│ results │───►│ scoring │     │
+│    └────┬────┘    └────┬────┘    └────┬────┘    └────┬────┘     │
+│         ▼              ▼              ▼              ▼          │
+│      YouTube         Claude        TheSportsDB     DuckDB       │
+│      transcript      Haiku LLM     match data      Brier 2/3w   │
+└─────────────────────────────────┬───────────────────────────────┘
+                                  ▼
+                ┌──────────────────────────────────────┐
+                │  data/predictions.parquet            │
+                │  one row per prediction; single      │
+                │  source of truth, committed to git   │
+                └─────────────────┬────────────────────┘
+                                  ▼
+                ┌──────────────────────────────────────┐
+                │            maldini.render            │
+                │  DuckDB CTEs  →  summary stats       │
+                │  Jinja2       →  dist/index.html     │
+                │                  dist/index.en.html  │
+                └─────────────────┬────────────────────┘
+                                  ▼
+                       GitHub Pages (auto)
+
+(*) Optional manual scoreline fixups for matches TheSportsDB can't auto-resolve.
+Schedule: GitHub Actions cron, Sundays 08:00 UTC (.github/workflows/weekly.yml).
 ```
 
-**Parquet is the single source of truth.** It lives in git, so every dashboard build is reproducible from a commit hash. The pipeline is idempotent – re-running it on the same `videos.csv` only processes new `video_id`s.
-
-Schedule: **GitHub Actions** runs a weekly cron (Sundays 08:00 UTC) that executes the pipeline + render and commits the artifacts back to `main`. GitHub Pages auto-publishes `dist/`. No infrastructure to maintain.
+**Parquet is the single source of truth.** It lives in git, so every dashboard build is reproducible from a commit hash. The pipeline is idempotent – re-running it on the same `videos.csv` only processes new `video_id`s, and pending predictions (matches not yet played) are persisted with null results so the next run picks them up.
 
 ---
 
