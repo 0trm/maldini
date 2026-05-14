@@ -30,25 +30,25 @@ Maldini earns the superforecaster badge only when his all-time average Brier sco
 ```
 data/videos.csv  ──┐
                    ▼
-              ┌──────────────┐
-              │ pipeline.py  │  fetch transcript      (youtube-transcript-api)
-              │              │  extract predictions   (Claude Haiku)
-              │              │  fetch match results   (TheSportsDB)
-              │              │  compute Brier scores  (DuckDB SQL)
-              └──────┬───────┘
+              ┌─────────────────────┐
+              │ maldini.pipeline    │  fetch transcript      (youtube-transcript-api)
+              │                     │  extract predictions   (Claude Haiku)
+              │                     │  fetch match results   (TheSportsDB)
+              │                     │  compute Brier scores  (DuckDB SQL)
+              └──────┬──────────────┘
                      ▼
        data/predictions.parquet   (one row per scored prediction)
                      │
                      ▼
-              ┌──────────────┐
-              │ render.py    │  summary stats   (DuckDB SQL)
-              │              │  bilingual HTML  (Jinja2, EN/ES)
-              └──────┬───────┘
+              ┌─────────────────────┐
+              │ maldini.render      │  summary stats   (DuckDB SQL)
+              │                     │  bilingual HTML  (Jinja2, EN/ES)
+              └──────┬──────────────┘
                      ▼
               dist/index.html   →   served by GitHub Pages
 ```
 
-**Parquet is the single source of truth.** It lives in git, so every dashboard build is reproducible from a commit hash. `pipeline.py` is idempotent – re-running it on the same `videos.csv` only processes new `video_id`s.
+**Parquet is the single source of truth.** It lives in git, so every dashboard build is reproducible from a commit hash. The pipeline is idempotent – re-running it on the same `videos.csv` only processes new `video_id`s.
 
 Schedule: **GitHub Actions** runs a weekly cron (Sundays 08:00 UTC) that executes the pipeline + render and commits the artifacts back to `main`. GitHub Pages auto-publishes `dist/`. No infrastructure to maintain.
 
@@ -56,14 +56,14 @@ Schedule: **GitHub Actions** runs a weekly cron (Sundays 08:00 UTC) that execute
 
 ## Transformation
 
-All SQL runs in **DuckDB** in-process, embedded inside `pipeline.py` (scoring) and `render.py` (summary stats). No warehouse, no credentials, no quotas.
+All SQL runs in **DuckDB** in-process, embedded inside `src/maldini/pipeline.py` (scoring) and `src/maldini/render.py` (summary stats). No warehouse, no credentials, no quotas.
 
 Brier score variants:
 
 - **3-outcome** (league matches): `((p_home - I_home)² + (p_draw - I_draw)² + (p_away - I_away)²) / 3`
 - **2-outcome** (knockout, where `pred_draw_pct = 0`): renormalise home + away to sum to 1, then `((p_home - I_home)² + (p_away - I_away)²) / 2`
 
-Summary statistics (all-time average, accuracy, monthly trend, competition breakdown, Brier distribution) are computed by `render.py` from the parquet at render time – a few short CTEs, no separate materialised tables.
+Summary statistics (all-time average, accuracy, monthly trend, competition breakdown, Brier distribution) are computed by `maldini.render` from the parquet at render time – a few short CTEs, no separate materialised tables.
 
 ---
 
@@ -71,7 +71,7 @@ Summary statistics (all-time average, accuracy, monthly trend, competition break
 
 | Layer | Technology |
 |---|---|
-| Pipeline | Python (`pipeline.py`) |
+| Pipeline | Python package (`src/maldini/`) |
 | Transformations | DuckDB (in-process SQL) |
 | Storage | Parquet file in git (`data/predictions.parquet`) |
 | LLM | Anthropic Claude Haiku |
@@ -92,7 +92,7 @@ For a full step-by-step guide, see [docs/SETUP.md](docs/SETUP.md). The summary b
 git clone https://github.com/tomas-ravalli/maldini-stats.git
 cd maldini-stats
 uv venv && source .venv/bin/activate
-uv pip install -r requirements.txt
+uv pip install -e ".[dev]"
 cp .env.example .env   # fill in YOUTUBE_API_KEY and ANTHROPIC_API_KEY
 ```
 
@@ -100,14 +100,16 @@ cp .env.example .env   # fill in YOUTUBE_API_KEY and ANTHROPIC_API_KEY
 
 ```bash
 # 1. Ingest, extract, fetch results, score
-python pipeline.py --file data/videos.csv
+python -m maldini.pipeline --file data/videos.csv
 
 # 2. Generate static HTML from the parquet
-python render.py
+python -m maldini.render
 
 # 3. View
 open dist/index.html
 ```
+
+Equivalently, the package exposes `maldini-pipeline` and `maldini-render` console scripts. Run `pytest` for the unit tests.
 
 To add new videos: append rows to `data/videos.csv` and re-run.
 
@@ -128,7 +130,6 @@ To add new videos: append rows to `data/videos.csv` and re-run.
 
 - [docs/SETUP.md](docs/SETUP.md) – step-by-step local setup and verification
 - [docs/DATA_FORMAT.md](docs/DATA_FORMAT.md) – input/output schemas for the pipeline
-- [CONTRIBUTING.md](CONTRIBUTING.md) – coding conventions and where to add new logic
 
 ---
 

@@ -17,21 +17,21 @@ git clone https://github.com/tomas-ravalli/maldini-stats.git
 cd maldini-stats
 uv venv
 source .venv/bin/activate
-uv pip install -r requirements.txt
+uv pip install -e ".[dev]"
 cp .env.example .env
 # edit .env and fill in YOUTUBE_API_KEY and ANTHROPIC_API_KEY
 ```
 
 ## 3. Run the pipeline
 
-`pipeline.py` ingests one or more YouTube videos, extracts predictions via Claude, fetches match results, computes Brier scores, and appends to `data/predictions.parquet`.
+`maldini.pipeline` ingests one or more YouTube videos, extracts predictions via Claude, fetches match results, computes Brier scores, and appends to `data/predictions.parquet`.
 
 ```bash
 # single video
-python pipeline.py --video-url "https://www.youtube.com/watch?v=..."
+python -m maldini.pipeline --video-url "https://www.youtube.com/watch?v=..."
 
 # or a CSV of video URLs
-python pipeline.py --file data/videos.csv
+python -m maldini.pipeline --file data/videos.csv
 ```
 
 The pipeline is idempotent -- videos already represented in the parquet are skipped.
@@ -39,10 +39,10 @@ The pipeline is idempotent -- videos already represented in the parquet are skip
 ## 4. Render the dashboard
 
 ```bash
-python render.py
+python -m maldini.render
 ```
 
-`render.py` reads `data/predictions.parquet`, runs DuckDB SQL to compute summary statistics, and renders Jinja2 templates to `dist/index.html` (bilingual EN/ES).
+`maldini.render` reads `data/predictions.parquet`, runs DuckDB SQL to compute summary statistics, and renders Jinja2 templates to `dist/index.html` (bilingual EN/ES).
 
 ## 5. View the dashboard
 
@@ -56,8 +56,8 @@ python -m http.server -d dist 8000
 
 The repo ships `.github/workflows/weekly.yml`. The workflow:
 
-1. Runs `pipeline.py --file data/videos.csv` every Sunday at 08:00 UTC.
-2. Runs `render.py` to regenerate `dist/`.
+1. Runs `python -m maldini.pipeline --file data/videos.csv` every Sunday at 08:00 UTC.
+2. Runs `python -m maldini.render` to regenerate `dist/`.
 3. Commits the updated `data/predictions.parquet` and `dist/` back to `main`.
 4. GitHub Pages auto-publishes `dist/`.
 
@@ -81,6 +81,6 @@ python -c "import duckdb; print(duckdb.sql(\"SELECT COUNT(*) FROM 'data/predicti
 
 ## Troubleshooting
 
-- **`KeyError: 'YOUTUBE_API_KEY'`** -- `.env` is missing or not populated. `pipeline.py` calls `dotenv.load_dotenv()` from the repo root.
+- **`KeyError: 'YOUTUBE_API_KEY'`** -- `.env` is missing or not populated. `maldini.pipeline` calls `dotenv.load_dotenv()` from the repo root.
 - **"Could not fetch transcript"** -- the video has captions disabled. The pipeline skips such videos with a warning.
 - **Dashboard styling looks broken locally** -- some templates load CSS via relative paths that browsers block on `file://`. Serve via `python -m http.server -d dist` instead.

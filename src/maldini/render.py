@@ -19,7 +19,7 @@ import duckdb
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[2]
 PREDICTIONS_PARQUET = ROOT / "data" / "predictions.parquet"
 TEMPLATES_DIR       = ROOT / "templates"
 DIST_DIR            = ROOT / "dist"

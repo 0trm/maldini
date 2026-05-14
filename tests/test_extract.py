@@ -7,7 +7,7 @@ External calls (Anthropic API) are mocked.
 import json
 from unittest.mock import MagicMock
 
-from extract import (
+from maldini.extract import (
     build_prediction_rows,
     extract_predictions_from_transcript,
 )

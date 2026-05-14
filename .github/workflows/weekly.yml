@@ -21,16 +21,16 @@ jobs:
         run: uv venv --python 3.13
 
       - name: Install dependencies
-        run: uv pip install -r requirements.txt
+        run: uv pip install -e .
 
       - name: Run pipeline
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: uv run python pipeline.py --file data/videos.csv
+        run: uv run python -m maldini.pipeline --file data/videos.csv
 
       - name: Render dashboard
-        run: uv run python render.py
+        run: uv run python -m maldini.render
 
       - name: Commit artifacts
         run: |
