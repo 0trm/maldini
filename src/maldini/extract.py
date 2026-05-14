@@ -14,7 +14,7 @@ from datetime import date
 
 import anthropic
 
-from scoring import classify_match_type
+from maldini.scoring import classify_match_type
 
 SYSTEM_PROMPT = """You are a precise data extractor. Your job is to find football match predictions
 in Spanish-language transcripts from the YouTube channel "Mundo Maldini".

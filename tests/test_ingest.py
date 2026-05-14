@@ -6,7 +6,7 @@ External calls (YouTube API, youtube-transcript-api) are mocked.
 
 from unittest.mock import MagicMock, patch
 
-from ingest import (
+from maldini.ingest import (
     fetch_yt_metadata,
     fetch_yt_transcript,
     parse_video_id,
@@ -89,12 +89,12 @@ class TestFetchYtMetadata:
 
 
 class TestFetchYtTranscript:
-    @patch("ingest.YouTubeTranscriptApi")
+    @patch("maldini.ingest.YouTubeTranscriptApi")
     def test_joins_segments_into_text(self, MockYTApi):
         MockYTApi.return_value.fetch.return_value = [_snippet(t) for t in FAKE_SNIPPET_TEXTS]
         assert fetch_yt_transcript(MALDINI_VIDEO_ID) == FAKE_TRANSCRIPT_TEXT
 
-    @patch("ingest.YouTubeTranscriptApi")
+    @patch("maldini.ingest.YouTubeTranscriptApi")
     def test_tries_spanish_first(self, MockYTApi):
         MockYTApi.return_value.fetch.return_value = [_snippet(t) for t in FAKE_SNIPPET_TEXTS]
         fetch_yt_transcript(MALDINI_VIDEO_ID)
@@ -102,7 +102,7 @@ class TestFetchYtTranscript:
             MALDINI_VIDEO_ID, languages=["es", "en"]
         )
 
-    @patch("ingest.YouTubeTranscriptApi")
+    @patch("maldini.ingest.YouTubeTranscriptApi")
     def test_returns_none_on_failure(self, MockYTApi):
         MockYTApi.return_value.fetch.side_effect = Exception("Transcripts disabled")
         assert fetch_yt_transcript(MALDINI_VIDEO_ID) is None

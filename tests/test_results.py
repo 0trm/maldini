@@ -4,7 +4,7 @@ Unit tests for results.py.
 All tested functions are pure (no network calls). External APIs are not invoked.
 """
 
-from results import (
+from maldini.results import (
     fetch_result,
     get_result_code,
     infer_season,

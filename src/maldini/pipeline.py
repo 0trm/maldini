@@ -31,12 +31,9 @@ import pandas as pd
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
 
-import extract
-import ingest
-import results
-import scoring
+from maldini import extract, ingest, results, scoring
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(ROOT / ".env")
 
 DATA_DIR        = ROOT / "data"

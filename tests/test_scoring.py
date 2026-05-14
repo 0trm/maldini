@@ -7,7 +7,7 @@ Brier formula reference (lower = better, 0 = perfect):
         ((p_home - I_home)^2 + (p_away - I_away)^2) / 2
 """
 
-from scoring import (
+from maldini.scoring import (
     brier_2way,
     brier_3way,
     classify_match_type,
