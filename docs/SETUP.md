@@ -54,12 +54,13 @@ python -m http.server -d dist 8000
 
 ## 6. Automate weekly
 
-The repo ships `.github/workflows/weekly.yml`. The workflow:
+The repo ships `.github/workflows/weekly.yml`. Its Sunday 08:00 UTC cron is commented out, so it runs only when triggered from the Actions tab (`workflow_dispatch`). Uncomment the `schedule` block to run it weekly. The workflow:
 
-1. Runs `python -m maldini.pipeline --file data/videos.csv` every Sunday at 08:00 UTC.
+1. Runs `python -m maldini.pipeline --file data/videos.csv`.
 2. Runs `python -m maldini.render` to regenerate `dist/`.
 3. Commits the updated `data/predictions.parquet` and `dist/` back to `main`.
-4. GitHub Pages auto-publishes `dist/`.
+
+GitHub Pages serves `docs/`, not `dist/`: the published dashboard is `docs/stats.html`. To publish a fresh render, copy `dist/index.html` over it.
 
 Required repository secrets:
 
