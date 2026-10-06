@@ -49,5 +49,7 @@ def compute_brier(row: dict) -> float | None:
     p_draw = row["pred_draw_pct"] / 100.0
     p_away = row["pred_away_win_pct"] / 100.0
     if row.get("match_type") == "knockout":
+        if actual == "D":
+            return None  # two-outcome forecast; the winner must come from an override
         return brier_2way(p_home, p_away, actual)
     return brier_3way(p_home, p_draw, p_away, actual)

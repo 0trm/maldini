@@ -269,3 +269,33 @@ class TestFetchResult:
         result = fetch_result(pred, api)
         assert result is not None
         assert result["home_goals"] == 2
+
+
+class TestLevelKnockouts:
+    """A knockout forecast has two outcomes (who goes through); a level score can't label it."""
+
+    def test_tied_aggregate_stays_pending_instead_of_scoring_leg1(self):
+        leg1 = _api_match("Real Madrid", "Bayern", 2, 1, "2025-02-18")
+        leg2 = _api_match("Bayern", "Real Madrid", 1, 0, "2025-03-05")
+        assert fetch_result(_ucl_pred(), [leg1, leg2]) is None
+
+    def test_single_leg_knockout_level_after_extra_time_stays_pending(self):
+        pred = {
+            "home_team": "Real Madrid", "away_team": "Barcelona",
+            "match_date": "2025-04-26", "publish_date": "2025-04-20",
+            "match_type": "knockout", "competition": "Copa del Rey",
+        }
+        api = [_api_match("Real Madrid", "Barcelona", 2, 2, "2025-04-26")]
+        assert fetch_result(pred, api) is None
+
+    def test_ucl_knockout_with_one_leg_listed_still_uses_it(self):
+        leg1 = _api_match("Real Madrid", "Bayern", 3, 1, "2025-03-05")
+        assert fetch_result(_ucl_pred(), [leg1])["actual_result"] == "H"
+
+    def test_league_draw_is_still_a_draw(self):
+        pred = {
+            "home_team": "Real Madrid", "away_team": "Barcelona",
+            "match_date": "2025-03-15", "publish_date": "2025-03-10",
+            "match_type": "single", "competition": "LaLiga",
+        }
+        assert fetch_result(pred, [_api_match("Real Madrid", "Barcelona", 1, 1)])["actual_result"] == "D"

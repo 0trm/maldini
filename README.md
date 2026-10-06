@@ -173,6 +173,8 @@ To add new videos: append rows to `data/videos.csv` and re-run.
 - **Fuzzy team matching** – normalisation strips accents, common prefixes (`Real`, `Atlético`), and applies Spanish→English word substitutions before substring matching against TheSportsDB results.
 - **No-date window** – predictions without a `match_date` use a 45-day window from `publish_date` to find the matching fixture.
 - **No-draw handling** – when `pred_draw_pct == 0`, a 2-outcome Brier formula is applied automatically.
+- **Level knockouts stay pending** – a two-outcome forecast is about who goes through, so a tie level on aggregate or a match decided on penalties is never scored as a draw or on the first leg. It waits for a `winner` in `data/results_overrides.csv`.
+- **Pending rows are retried** – every run re-resolves predictions without a score, so matches played since the last run and new overrides get picked up.
 
 ---
 

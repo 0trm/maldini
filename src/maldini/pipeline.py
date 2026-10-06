@@ -80,6 +80,14 @@ def write_predictions(df: pd.DataFrame) -> None:
     tmp.replace(PREDICTIONS_PARQUET)
 
 
+def pending_rows(df: pd.DataFrame) -> list[dict]:
+    """Rows to resolve again, as plain dicts: no score yet (match not played, unmatched, level
+    knockout), or a knockout labelled as a draw by older versions that scored it on the first leg."""
+    mislabelled = (df["match_type"] == "knockout") & (df["actual_result"] == "D")
+    pending = df[df["brier_score"].isna() | mislabelled]
+    return pending.astype(object).where(pending.notna(), None).to_dict("records")
+
+
 # ── Overrides ─────────────────────────────────────────────────────────────────
 def load_overrides() -> dict[str, dict]:
     if not OVERRIDES_CSV.exists():
@@ -98,6 +106,9 @@ def load_overrides() -> dict[str, dict]:
         out[pid] = {
             "home_goals":  int(row["home_goals"]),
             "away_goals":  int(row["away_goals"]),
+            "winner":      (str(row["winner"]).strip().upper()
+                            if "winner" in df.columns and pd.notna(row["winner"])
+                            else None),
             "match_date":  (str(row["match_date"]).strip()
                             if "match_date" in df.columns and pd.notna(row["match_date"])
                             else None),
@@ -114,6 +125,8 @@ def apply_override(row: dict, override: dict) -> dict:
     row["home_goals"] = hg
     row["away_goals"] = ag
     row["actual_result"] = results.get_result_code(hg, ag)
+    if override.get("winner") in ("H", "A"):
+        row["actual_result"] = override["winner"]  # who went through after a level score
     if override.get("match_date"):
         row["match_date"] = override["match_date"]
     if override.get("match_type") in ("single", "knockout"):
@@ -288,28 +301,31 @@ def main():
         print(f"\n-> {url}")
         new_rows.extend(process_video(yt, client, url))
 
-    if not new_rows:
+    # Retry every stored prediction that has no score yet: matches played since
+    # the last run, and level knockouts whose winner was added to the overrides.
+    retry_rows = pending_rows(existing)
+    if not new_rows and not retry_rows:
         print("\nNothing new to process.")
         return
 
-    print(f"\nresolving results for {len(new_rows)} new prediction(s)...")
+    print(f"\nresolving results for {len(new_rows)} new and {len(retry_rows)} pending prediction(s)...")
     overrides = load_overrides()
     if overrides:
         print(f"  loaded {len(overrides)} override(s) from {OVERRIDES_CSV.name}")
-    attach_results(new_rows, overrides)
+    attach_results(new_rows + retry_rows, overrides)
 
-    new_df = pd.DataFrame(new_rows)
-    combined = pd.concat([existing, new_df], ignore_index=True)
+    new_df = pd.DataFrame(new_rows + retry_rows)
+    combined = pd.concat([existing.assign(_fresh=0), new_df.assign(_fresh=1)], ignore_index=True)
 
-    # DuckDB pass: dedupe on prediction_id (keep latest) and sort.
+    # DuckDB pass: dedupe on prediction_id (this run's version wins, then latest fetch) and sort.
     con = duckdb.connect(":memory:")
     con.register("combined", combined)
     dedup = con.sql("""
-        select * exclude (rn)
+        select * exclude (rn, _fresh)
         from (
             select *, row_number() over (
                 partition by prediction_id
-                order by fetched_at desc nulls last
+                order by _fresh desc, fetched_at desc nulls last
             ) as rn
             from combined
         )
