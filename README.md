@@ -1,6 +1,8 @@
 # Maldini
 
-*Maldini* is one of Spain's most prominent football journalists. Every week on his YouTube channel [@mundomaldini](https://www.youtube.com/@mundomaldini) he makes explicit, probabilistic predictions about upcoming matches. This project captures every prediction, scores it objectively with a [Brier score](https://en.wikipedia.org/wiki/Brier_score), and surfaces the answer in a dashboard.
+[![tests](https://github.com/0trm/maldini/actions/workflows/tests.yml/badge.svg)](https://github.com/0trm/maldini/actions/workflows/tests.yml)
+
+*Maldini* is one of Spain's most prominent football journalists. Every week on his YouTube channel [@mundomaldini](https://www.youtube.com/@mundomaldini) he makes explicit, probabilistic predictions about upcoming matches. This project captures every prediction, scores it objectively with a [Brier score](https://en.wikipedia.org/wiki/Brier_score), and surfaces the answer in a [dashboard](https://0trm.github.io/maldini/stats.html).
 
 <img width="775" alt="maldini-youtube" src="https://github.com/user-attachments/assets/87c6d194-7d76-4261-be76-b031587856e7" />
 
@@ -95,10 +97,11 @@ Single matches are noisy. A confident wrong call gets punished hard. The average
                 │                  dist/index.en.html  │
                 └─────────────────┬────────────────────┘
                                   ▼
-                       GitHub Pages (auto)
+              dist/ (local) · docs/stats.html (published)
 
 (*) Manual scoreline fixups for matches TheSportsDB can't auto-resolve.
-Schedule: GitHub Actions cron, Sundays 08:00 UTC (.github/workflows/weekly.yml).
+Schedule: manual. .github/workflows/weekly.yml runs on workflow_dispatch;
+its Sunday 08:00 UTC cron is switched off.
 ```
 
 **Parquet is the single source of truth.** It lives in git, so every dashboard build is reproducible from a commit hash. The pipeline is idempotent – re-running it on the same `videos.csv` only processes new `video_id`s, and pending predictions (matches not yet played) are persisted with null results so the next run picks them up.
@@ -128,8 +131,9 @@ Summary statistics (all-time average, accuracy, monthly trend, competition break
 | LLM | Anthropic Claude Haiku |
 | External APIs | YouTube Data API v3, youtube-transcript-api, TheSportsDB |
 | Dashboard | Jinja2 → static HTML |
-| Schedule | GitHub Actions (weekly cron) |
-| Hosting | GitHub Pages |
+| Schedule | GitHub Actions, manual trigger (weekly cron switched off) |
+| Hosting | GitHub Pages, serving `docs/` (the April 2026 snapshot in `docs/stats.html`) |
+| CI | GitHub Actions runs `pytest` on every push |
 
 ---
 
