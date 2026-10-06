@@ -84,3 +84,12 @@ class TestComputeBrier:
             "match_type": "knockout", "actual_result": "H",
         }
         assert compute_brier(row) == 0.04
+
+
+class TestKnockoutDraw:
+    def test_knockout_labelled_draw_is_not_scored(self):
+        row = {
+            "pred_home_win_pct": 60, "pred_draw_pct": 0, "pred_away_win_pct": 40,
+            "match_type": "knockout", "actual_result": "D",
+        }
+        assert compute_brier(row) is None

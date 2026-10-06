@@ -242,7 +242,8 @@ def match_prediction_to_result(pred: dict, api_matches: list[dict]) -> Optional[
     return None
 
 
-def match_aggregate_to_result(pred: dict, api_matches: list[dict]) -> Optional[dict]:
+def find_legs(pred: dict, api_matches: list[dict]) -> tuple[Optional[dict], Optional[dict]]:
+    """First leg (prediction's home team at home) and second leg (reversed fixture), if listed."""
     home = pred["home_team"]
     away = pred["away_team"]
 
@@ -258,7 +259,14 @@ def match_aggregate_to_result(pred: dict, api_matches: list[dict]) -> Optional[d
             leg2 = m
         if leg1 and leg2:
             break
+    return leg1, leg2
 
+
+def match_aggregate_to_result(pred: dict, api_matches: list[dict]) -> Optional[dict]:
+    home = pred["home_team"]
+    away = pred["away_team"]
+
+    leg1, leg2 = find_legs(pred, api_matches)
     if leg1 is None or leg2 is None:
         return None
 
@@ -296,6 +304,11 @@ def fetch_result(pred: dict, api_matches: list[dict]) -> Optional[dict]:
     """
     Resolve a prediction to a finished-match result. For knockout predictions in
     UCL/UEL we attempt aggregate matching first; otherwise single-leg only.
+
+    A knockout prediction has two outcomes (who goes through), so a level score
+    cannot label it: a tie level on aggregate, or a single match decided on
+    penalties, stays pending until data/results_overrides.csv records the winner.
+    Scoring it on the first leg, or as a draw, would grade the wrong event.
     """
     is_knockout = pred.get("match_type") == "knockout"
     is_aggregate_candidate = is_knockout and pred.get("competition") in AGGREGATE_COMPETITIONS
@@ -304,4 +317,14 @@ def fetch_result(pred: dict, api_matches: list[dict]) -> Optional[dict]:
         agg = match_aggregate_to_result(pred, api_matches)
         if agg is not None:
             return agg
-    return match_prediction_to_result(pred, api_matches)
+        leg1, leg2 = find_legs(pred, api_matches)
+        if leg1 is not None and leg2 is not None:
+            return None  # level on aggregate; match_aggregate_to_result already asked for an override
+
+    result = match_prediction_to_result(pred, api_matches)
+    if is_knockout and result is not None and result["actual_result"] == "D":
+        print(f"  [REVIEW] {pred['home_team']} vs {pred['away_team']} knockout ended level "
+              f"{result['home_goals']}-{result['away_goals']} (penalties?). "
+              "Record the winner in data/results_overrides.csv.")
+        return None
+    return result

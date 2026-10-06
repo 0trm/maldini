@@ -70,8 +70,9 @@ When TheSportsDB cannot match a prediction (unusual competition name, ET/penalti
 | `away_goals` | Yes | Integer. |
 | `match_date` | No | `YYYY-MM-DD`. Falls back to the prediction's stored date. |
 | `match_type` | No | `single` or `knockout`. Provide to override an incorrect extraction. |
+| `winner` | No | `H` or `A`: who went through when a knockout ended level (aggregate tie, penalties). Required for those rows to be scored. |
 
-`actual_result` (H/D/A) is derived from goals automatically.
+`actual_result` (H/D/A) is derived from goals automatically, unless `winner` is set.
 
 Example:
 
