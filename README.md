@@ -192,3 +192,5 @@ To add new videos: append rows to `data/videos.csv` and re-run.
 ## License
 
 MIT
+
+The favicon is the crystal ball emoji from [Noto Emoji](https://github.com/googlefonts/noto-emoji) (Apache 2.0).
