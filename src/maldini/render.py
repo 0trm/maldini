@@ -40,7 +40,7 @@ def load_stats():
     """Run DuckDB CTEs over the parquet and return the structured stats payload."""
     if not PREDICTIONS_PARQUET.exists():
         raise FileNotFoundError(
-            f"{PREDICTIONS_PARQUET} not found. Run pipeline.py first."
+            f"{PREDICTIONS_PARQUET} not found. Run `python -m maldini.pipeline` first."
         )
 
     con = duckdb.connect(":memory:")
@@ -499,7 +499,7 @@ def build_sections(T, fmt, df_scored, avg_brier, std_brier, accuracy,
     footer = [
         rule(),
         f'{T["last_upd"]}: {now}',
-        f'{T["author"]}: tomas-ravalli',
+        f'{T["author"]}: <a href="https://github.com/0trm" target="_blank" rel="noopener">0trm</a>',
         "\U0001f41f",
     ]
 

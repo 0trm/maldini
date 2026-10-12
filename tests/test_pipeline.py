@@ -4,6 +4,7 @@ Unit tests for the pending-retry and override helpers in pipeline.py.
 
 import pandas as pd
 
+from maldini import pipeline
 from maldini.pipeline import apply_override, pending_rows
 
 
@@ -42,3 +43,18 @@ class TestApplyOverride:
     def test_without_winner_result_comes_from_goals(self):
         row = apply_override(_row("x", result=None, brier=None), {"home_goals": 0, "away_goals": 2})
         assert row["actual_result"] == "A"
+
+
+class TestListPending:
+    def test_lists_unscored_rows_including_level_knockouts(self, monkeypatch, capsys):
+        rows = [
+            _row("scored"),
+            _row("unplayed", result=None, brier=None),
+            _row("level_knockout", match_type="knockout", result="D", brier=None),
+        ]
+        for r in rows:
+            r.update(home_team="A", away_team="B")
+        monkeypatch.setattr(pipeline, "load_predictions", lambda: pd.DataFrame(rows))
+        pipeline.list_pending()
+        out = capsys.readouterr().out
+        assert "unplayed" in out and "level_knockout" in out and "scored " not in out

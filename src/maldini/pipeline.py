@@ -12,10 +12,10 @@ are skipped. Pending predictions (no result yet) are persisted with null
 result fields so the next run picks them up.
 
 Usage:
-    python pipeline.py --file data/videos.csv
-    python pipeline.py --video-url "https://www.youtube.com/watch?v=..."
-    python pipeline.py --file data/videos.csv --dry-run
-    python pipeline.py --list-pending
+    python -m maldini.pipeline --file data/videos.csv
+    python -m maldini.pipeline --video-url "https://www.youtube.com/watch?v=..."
+    python -m maldini.pipeline --file data/videos.csv --dry-run
+    python -m maldini.pipeline --list-pending
 """
 
 from __future__ import annotations
@@ -240,7 +240,8 @@ def list_pending() -> None:
     if df.empty:
         print("No predictions yet.")
         return
-    pending = df[df["actual_result"].isna()].copy()
+    # No score yet: unplayed or unmatched matches, and level knockouts awaiting a winner.
+    pending = df[df["brier_score"].isna()].copy()
     today = pd.Timestamp.today().date()
     pending = pending[pending["publish_date"].apply(
         lambda d: pd.notna(d) and pd.Timestamp(d).date() <= today
