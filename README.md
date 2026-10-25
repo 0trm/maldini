@@ -2,7 +2,7 @@
 
 [![tests](https://github.com/0trm/maldini/actions/workflows/tests.yml/badge.svg)](https://github.com/0trm/maldini/actions/workflows/tests.yml)
 
-*Maldini* is one of Spain's most prominent football journalists. Every week on his YouTube channel [@mundomaldini](https://www.youtube.com/@mundomaldini) he makes explicit, probabilistic predictions about upcoming matches. This project captures every prediction, scores it objectively with a [Brier score](https://en.wikipedia.org/wiki/Brier_score), and surfaces the answer in a [dashboard](https://0trm.dev/maldini/stats.html).
+*Maldini* is one of Spain's most prominent football journalists. Every week on his YouTube channel [@mundomaldini](https://www.youtube.com/@mundomaldini) he makes explicit, probabilistic predictions about upcoming matches. This project captures every prediction, scores it objectively with a [Brier score](https://en.wikipedia.org/wiki/Brier_score), and surfaces the answer on a [site](https://0trm.dev/maldini/).
 
 <img width="775" alt="maldini-youtube" src="https://github.com/user-attachments/assets/87c6d194-7d76-4261-be76-b031587856e7" />
 
@@ -27,41 +27,9 @@ Maldini earns the superforecaster badge only when his all-time average Brier sco
 
 ## Analysis
 
-*Snapshot: April 2026, 1,435 scored predictions.*
+Over all 1,500 predictions, Maldini's Brier score is **0.1916**. He clears the threshold: one person, performing at the level of the betting markets.
 
-### The verdict
-
-![All-time Brier score](docs/images/maldini-brier-score.webp)
-
-Maldini's all-time Brier score is **0.1908**. He clears the threshold. One person, performing at the level of the betting markets.
-
-The dataset spans 2022-Q4 to the present, covering LaLiga, Champions League, Copa del Rey, international tournaments. At 1,400+ predictions, the average has had room to stabilise.
-
-### Is it consistent?
-
-![Brier score by quarter](docs/images/maldini-qbs.webp)
-
-Most quarters land below 0.20. Two don't: 2023-Q1 and 2024-Q3. Every other quarter clears it.
-
-A forecaster who averages 0.19 but swings between 0.10 and 0.28 is different from one who sits consistently around 0.18–0.19. Maldini's chart shows the second pattern with occasional spikes. Even Tetlock's superforecasters have bad stretches. The trend matters more than any single quarter, and the trend is flat and below the line.
-
-### Where does he struggle?
-
-![Brier score by competition](docs/images/maldini-competition-bd.webp)
-
-The competition breakdown maps to expertise and familiarity.
-
-- **LaLiga** – 59% of all predictions, Brier 0.194. He watches every match, knows every squad. This is the football he knows best.
-- **Champions League** – 29% of predictions, Brier 0.186. His best performance by volume.
-- The outliers: **World Cup** (0.227, n=13) and **Nations League** (0.240, n=7). International tournaments are harder to predict – less recent form data, higher variance in squads, one-off matches. The scores are above the threshold, but the samples are too small to draw conclusions.
-
-### The recent window
-
-![Recent predictions](docs/images/maldini-recent-pred.webp)
-
-Individual predictions show the full range. Bayern–Atalanta: 99% home, went home. Brier: 0.000. Czech Republic–Denmark: 65% away, home team won. Brier: 0.423.
-
-Single matches are noisy. A confident wrong call gets punished hard. The average smooths this out – that's the point of tracking 1,400+ predictions instead of picking examples.
+The [site](https://0trm.dev/maldini/) breaks it down by quarter, by competition and match by match, in English and Spanish.
 
 ---
 
@@ -132,7 +100,7 @@ Summary statistics (all-time average, accuracy, monthly trend, competition break
 | External APIs | YouTube Data API v3, youtube-transcript-api, TheSportsDB |
 | Dashboard | Jinja2 → static HTML |
 | Schedule | GitHub Actions, manual trigger (weekly cron switched off) |
-| Hosting | GitHub Pages, serving `docs/` (the April 2026 snapshot in `docs/stats.html`) |
+| Hosting | GitHub Pages, serving `docs/` (the final May 2026 snapshot in `docs/stats.html`) |
 | CI | GitHub Actions runs `pytest` on every push |
 
 ---
