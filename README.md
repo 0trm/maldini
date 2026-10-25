@@ -21,7 +21,7 @@ A Brier score measures the accuracy of probabilistic predictions – **lower is 
 
 Maldini earns the superforecaster badge only when his all-time average Brier score drops below 0.20 – and only once he has 100+ scored predictions for statistical reliability. 
 
-> The project tracks **1,500 predictions** from 2022-Q4 to 2026-Q2.
+> The project tracks **1,500 predictions** from 2022-Q4 to 2026-Q2. Final data from 11 May 2026.
 
 ---
 
@@ -98,7 +98,7 @@ Summary statistics (all-time average, accuracy, monthly trend, competition break
 | Storage | Parquet file in git (`data/predictions.parquet`) |
 | LLM | Anthropic Claude Haiku |
 | External APIs | YouTube Data API v3, youtube-transcript-api, TheSportsDB |
-| Dashboard | Jinja2 → static HTML |
+| Dashboard | Jinja2 → static HTML in `dist/`; the published page is the final snapshot, styled like [0trm.dev](https://0trm.dev) |
 | Schedule | GitHub Actions, manual trigger (weekly cron switched off) |
 | Hosting | GitHub Pages, serving `docs/` (the final May 2026 snapshot in `docs/stats.html`) |
 | CI | GitHub Actions runs `pytest` on every push |

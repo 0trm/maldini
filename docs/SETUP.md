@@ -58,7 +58,7 @@ The repo ships `.github/workflows/weekly.yml`. Its Sunday 08:00 UTC cron is comm
 2. Runs `python -m maldini.render` to regenerate `dist/`.
 3. Commits the updated `data/predictions.parquet` and `dist/` back to `main`.
 
-GitHub Pages serves `docs/`, not `dist/`: the published dashboard is `docs/stats.html`. To publish a fresh render, copy `dist/index.html` over it.
+GitHub Pages serves `docs/`, not `dist/`: the published page is `docs/stats.html`, the final snapshot styled like 0trm.dev. A fresh render stays in `dist/`; copying it over `docs/stats.html` would replace that page with the plain dashboard.
 
 Required repository secrets:
 
