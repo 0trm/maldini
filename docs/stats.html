@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>
   (function () {
-    var t = null; try { t = localStorage.getItem("0trm-theme"); } catch (e) {}
+    var t = null; try { t = localStorage.getItem("maldini-theme"); } catch (e) {}
     document.documentElement.dataset.theme = t === "light" ? "light" : "dark";
     var l = null; try { l = localStorage.getItem("lang"); } catch (e) {}
     document.documentElement.lang = l === "en" ? "en" : "es";
@@ -131,7 +131,7 @@ Average Brier score, lower is better (┊ = 0.20)
                          .18     .19     .20     .21     .22     .23
                           ├───────┼───────┼───────┼───────┼───────┤
 Betting markets    ≈0.19          ●       ┊                        
-<b class="me">Maldini, 1,500    0.1916           ◆      ┊                        </b>
+<b class="me">Maldini, 1,500    0.1916</b>           <span class="me">◆</span>      ┊                        
 A third each      0.2222                  ┊                 ●      
 ------------------------------------------------------------------------
   Scored predictions     : <b>1,500</b>
@@ -199,7 +199,7 @@ Brier medio, menor es mejor (┊ = 0.20)
                          .18     .19     .20     .21     .22     .23
                           ├───────┼───────┼───────┼───────┼───────┤
 Mercados apuestas  ≈0.19          ●       ┊                        
-<b class="me">Maldini, 1.500    0.1916           ◆      ┊                        </b>
+<b class="me">Maldini, 1.500    0.1916</b>           <span class="me">◆</span>      ┊                        
 Un tercio a cada  0.2222                  ┊                 ●      
 ------------------------------------------------------------------------
   Predicciones puntuadas : <b>1.500</b>
@@ -269,7 +269,7 @@ Un tercio a cada  0.2222                  ┊                 ●
     b.addEventListener("click", function () {
       var next = (root.dataset.theme || (mq.matches ? "dark" : "light")) === "dark" ? "light" : "dark";
       root.dataset.theme = next;
-      try { localStorage.setItem("0trm-theme", next); } catch (e) {}
+      try { localStorage.setItem("maldini-theme", next); } catch (e) {}
     });
   });
   document.querySelectorAll("button.lang").forEach(function (b) {
