@@ -6,34 +6,45 @@
 <meta name="color-scheme" content="light dark">
 <title>Maldini Stats · Tomás Ravalli</title>
 <meta name="description" content="Is Maldini a superforecaster? 1,500 of his football predictions, from 2022-Q4 to 2026-Q2, scored with Brier scores.">
+<link rel="canonical" href="https://0trm.dev/maldini/stats.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://0trm.dev/maldini/stats.html">
+<meta property="og:title" content="Is Maldini a superforecaster?">
+<meta property="og:description" content="1,500 of a Spanish football journalist's match predictions, from 2022-Q4 to 2026-Q2, scored with Brier scores.">
+<meta property="og:image" content="https://0trm.dev/img/flow-og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Short dashes laid along a flowing field">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>
   (function () {
-    var t = null; try { t = localStorage.getItem("maldini-theme"); } catch (e) {}
-    document.documentElement.dataset.theme = t === "light" ? "light" : "dark";
+    var t = null; try { t = localStorage.getItem("0trm-theme"); } catch (e) {}
+    if (t === "dark" || t === "light") document.documentElement.dataset.theme = t;
     var l = null; try { l = localStorage.getItem("lang"); } catch (e) {}
-    document.documentElement.lang = l === "en" ? "en" : "es";
+    document.documentElement.lang = l === "en" || l === "es" ? l : (/^es\b/i.test(navigator.language || "") ? "es" : "en");
   })();
 </script>
 <style>
-:root { --bg: #fcfcfa; --text: #1a1a1a; --muted: #5a5a5a; --link: #0645ad; --visited: #5a3696; --bar: #ebebe5; --rule: #c4c4bc; --panel: #f3f3ee; --over: #b02a7f; color-scheme: light; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #282c34; --text: #d7dae0; --muted: #9da5b4; --link: #61afef; --visited: #c678dd; --bar: #353b45; --rule: #3e4451; --panel: #21252b; --over: #d4609f; color-scheme: dark; } }
-:root[data-theme="dark"] { --bg: #282c34; --text: #d7dae0; --muted: #9da5b4; --link: #61afef; --visited: #c678dd; --bar: #353b45; --rule: #3e4451; --panel: #21252b; --over: #d4609f; color-scheme: dark; }
+:root { --bg: #fafafa; --text: #383a42; --muted: #696c77; --link: #155aef; --visited: #a626a4; --bar: #f0f0f0; --rule: #d6d6d7; --panel: #f2f2f2; --over: #b02a7f; color-scheme: light; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #282c34; --text: #d7dae0; --muted: #9da5b4; --link: #61afef; --visited: #c678dd; --bar: #353b45; --rule: #3e4451; --panel: #21252b; --over: #d868a4; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #282c34; --text: #d7dae0; --muted: #9da5b4; --link: #61afef; --visited: #c678dd; --bar: #353b45; --rule: #3e4451; --panel: #21252b; --over: #d868a4; color-scheme: dark; }
 :root[lang="en"] [data-lang="es"], :root[lang="es"] [data-lang="en"] { display: none !important; }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-padding-top: 16px; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.6 Verdana, Geneva, Tahoma, sans-serif; overflow-wrap: break-word; }
-a { color: var(--link); }
+a { color: var(--link); text-underline-offset: .2em; text-decoration-thickness: 1px; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); }
+a:hover { text-decoration-color: currentColor; }
 a:visited { color: var(--visited); }
 .navtop { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
 .tools, .tools > span { display: inline-flex; align-items: center; gap: 12px; }
-.tools button.lang { padding: 0; background: none; border: 0; font: inherit; color: var(--muted); cursor: pointer; }
+.tools button.lang { padding: 8px 6px; margin: -8px -6px; background: none; border: 0; font: inherit; color: var(--muted); cursor: pointer; }
 .tools button:hover { color: var(--text); }
 .tools a { color: var(--muted); }
 .toggle button { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; padding: 0; background: none; border: 0; color: var(--muted); cursor: pointer; }
-.toggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
 .toggle .to-light { display: none; }
 :root[data-theme="dark"] .toggle .to-dark { display: none; }
 :root[data-theme="dark"] .toggle .to-light { display: inline-flex; }
@@ -120,11 +131,13 @@ main { max-width: 44em; }
   .vbars .r { grid-template-columns: minmax(0, 1fr) auto; }
   .vbars .track, .vbars .axis { grid-column: 1 / -1; }
   .vgrid { grid-template-columns: repeat(2, auto); }
+  .chart { margin-left: -16px; margin-right: -16px; padding-left: 8px; padding-right: 8px; border-left: 0; border-right: 0; border-radius: 0; }
+  .drawing { font-size: min(12px, calc((100vw - 16px) / 44)); }
 }
 </style>
 </head>
 <body>
-<div class="layout"><nav class="toc" aria-label="Contents"><div class="navtop"><a target="_blank" rel="noopener" href="https://0trm.dev/">0trm.dev</a><span class="tools"><span data-lang="en"><a target="_blank" rel="noopener" href="https://github.com/0trm/maldini">code</a><button type="button" class="lang">ES</button></span><span data-lang="es"><a target="_blank" rel="noopener" href="https://github.com/0trm/maldini">código</a><button type="button" class="lang">EN</button></span><span class="toggle"><button type="button" class="to-dark" aria-label="Switch to dark theme"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 12.6A6.8 6.8 0 0 1 7.4 4a6.8 6.8 0 1 0 8.6 8.6z"/></svg></button><button type="button" class="to-light" aria-label="Switch to light theme"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3.6"/><path d="M10 1.5v2.5M10 16v2.5M1.5 10H4M16 10h2.5M4 4l1.8 1.8M14.2 14.2 16 16M4 16l1.8-1.8M14.2 5.8 16 4"/></svg></button></span></span></div><details open><summary><span data-lang="en">Contents</span><span data-lang="es">Contenido</span></summary><ol><li class="l2" data-lang="en"><a href="#en-verdict">Verdict</a></li><li class="l2" data-lang="en"><a href="#en-quarters">Quarters</a></li><li class="l2" data-lang="en"><a href="#en-competitions">Competitions</a></li><li class="l2" data-lang="en"><a href="#en-recent">Recent matches</a></li><li class="l2" data-lang="en"><a href="#en-definitions">Definitions</a></li><li class="l2" data-lang="es"><a href="#es-verdict">Veredicto</a></li><li class="l2" data-lang="es"><a href="#es-quarters">Trimestres</a></li><li class="l2" data-lang="es"><a href="#es-competitions">Competiciones</a></li><li class="l2" data-lang="es"><a href="#es-recent">Partidos recientes</a></li><li class="l2" data-lang="es"><a href="#es-definitions">Definiciones</a></li></ol></details></nav><div><main><article data-lang="en"><h1>Is Maldini a superforecaster?</h1><p class="sub">1,500 predictions from 2022-Q4 to 2026-Q2. Final data from 11 May 2026.</p><p class="intro"><a href="https://www.youtube.com/@mundomaldini" target="_blank" rel="noopener">@mundomaldini</a> is a Spanish football journalist who publishes weekly match predictions. Predictions are evaluated with <b>Brier scores</b> (lower = more accurate). A <b>superforecaster</b> scores Brier &lt; 0.20. Naive baseline: 0.2222 (33% each H/D/A).</p><section class="sec" id="en-verdict"><h2>Verdict</h2><div class="row"><div class="fig"><figure class="chart"><pre class="drawing"><span class="hl">🔮 <b>SUPERFORECASTER?</b>  <b>[x] YES</b>   [ ] NO     (Brier 0.1916 &lt; 0.2)</span>
+<div class="layout"><nav class="toc" aria-label="Contents"><div class="navtop"><a href="https://0trm.dev/">0trm.dev</a><span class="tools"><span data-lang="en"><a target="_blank" rel="noopener" href="https://github.com/0trm/maldini">code</a><button type="button" class="lang">ES</button></span><span data-lang="es"><a target="_blank" rel="noopener" href="https://github.com/0trm/maldini">código</a><button type="button" class="lang">EN</button></span><span class="toggle"><button type="button" class="to-dark" aria-label="Switch to dark theme"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 12.6A6.8 6.8 0 0 1 7.4 4a6.8 6.8 0 1 0 8.6 8.6z"/></svg></button><button type="button" class="to-light" aria-label="Switch to light theme"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3.6"/><path d="M10 1.5v2.5M10 16v2.5M1.5 10H4M16 10h2.5M4 4l1.8 1.8M14.2 14.2 16 16M4 16l1.8-1.8M14.2 5.8 16 4"/></svg></button></span></span></div><details open><summary><span data-lang="en">Contents</span><span data-lang="es">Contenido</span></summary><ol><li class="l2" data-lang="en"><a href="#en-verdict">Verdict</a></li><li class="l2" data-lang="en"><a href="#en-quarters">Quarters</a></li><li class="l2" data-lang="en"><a href="#en-competitions">Competitions</a></li><li class="l2" data-lang="en"><a href="#en-recent">Recent matches</a></li><li class="l2" data-lang="en"><a href="#en-definitions">Definitions</a></li><li class="l2" data-lang="es"><a href="#es-verdict">Veredicto</a></li><li class="l2" data-lang="es"><a href="#es-quarters">Trimestres</a></li><li class="l2" data-lang="es"><a href="#es-competitions">Competiciones</a></li><li class="l2" data-lang="es"><a href="#es-recent">Partidos recientes</a></li><li class="l2" data-lang="es"><a href="#es-definitions">Definiciones</a></li></ol></details></nav><div><main><article data-lang="en"><h1>Is Maldini a superforecaster?</h1><p class="sub">1,500 predictions from 2022-Q4 to 2026-Q2. Final data from 11 May 2026.</p><p class="intro"><a href="https://www.youtube.com/@mundomaldini" target="_blank" rel="noopener">@mundomaldini</a> is a Spanish football journalist who publishes weekly match predictions. Predictions are evaluated with <b>Brier scores</b> (lower = more accurate). This project calls a forecaster a <b>superforecaster</b> below an average Brier of 0.20 over 100+ predictions: the term is Philip Tetlock's, the bar is this project's. Naive baseline: 0.2222 (33% each H/D/A).</p><section class="sec" id="en-verdict"><h2>Verdict</h2><div class="row"><div class="fig"><figure class="chart"><pre class="drawing"><span class="hl">🔮 <b>SUPERFORECASTER?</b>  <b>[x] YES</b>   [ ] NO     (Brier 0.1916 &lt; 0.2)</span>
 
 Average Brier score, lower is better (┊ = 0.20)
 
@@ -137,7 +150,7 @@ A third each      0.2222                  ┊                 ●
   Scored predictions     : <b>1,500</b>
   Accuracy               : <b>57.0%</b>
   Best quarter           : <b>2023-Q2</b>
-  Worst quarter          : <b>2023-Q1</b></pre></figure></div><p class="side">Lower is better. Over 1,500 scored predictions Maldini averages 0.1916: under the 0.20 superforecaster bar, and level with betting markets at about 0.19. Giving each outcome a third scores 0.2222.</p></div></section><section class="sec" id="en-quarters"><h2>Quarters</h2><div class="row"><div class="fig"><figure class="chart"><pre class="drawing">  0.28 ┤                                                              
+  Worst quarter          : <b>2023-Q1</b></pre></figure></div><p class="side">Lower is better. Over 1,500 scored predictions Maldini averages 0.1916: under this project's 0.20 bar, and level with betting markets at about 0.19. Giving each outcome a third scores 0.2222.</p></div></section><section class="sec" id="en-quarters"><h2>Quarters</h2><div class="row"><div class="fig"><figure class="chart"><pre class="drawing">  0.28 ┤                                                              
   0.26 ┤                                                              
   0.24 ┤      ██                                                      
   0.22 ┤  ██  ██                                                      
@@ -179,12 +192,14 @@ A third each      0.2222                  ┊                 ●
   2026-05-01 │ Girona        │ Mallorca      │ 50/30/20 │ A │ <span class="over">0.3267</span>
   2026-05-01 │ Osasuna       │ Barça         │ 20/30/50 │ A │ 0.1267
   2026-05-01 │ Alavés        │ Athletic Club │ 40/30/30 │ A │ <span class="over">0.2467</span></pre><figcaption>His last 15 scored predictions.</figcaption></figure></div><p class="side">Single matches are noisy. Atlético–Celta at 60% home ended in an away win (0.4200); Betis–Oviedo at 70% home went home (0.0467). That is why the verdict uses the average over 1,500.</p></div></section><section class="sec" id="en-definitions"><h2>Definitions</h2><div class="row"><div class="fig"><figure class="chart"><pre class="drawing">  <u>Brier score</u>    : Probabilistic accuracy metric. Lower = better.
-                 : Formula: (pH-rH)^2 + (pD-rD)^2 + (pA-rA)^2
+                 : Formula: ((pH-rH)^2 + (pD-rD)^2 + (pA-rA)^2) / 3
                  : p = predicted prob.; r = 1 if outcome, 0 if not.
-                 : Range 0-2. Perfect = 0. Naive baseline = 0.2222.
+                 : Range 0-0.667. Perfect = 0. Naive baseline = 0.2222.
 
-  <u>Superforecaster</u>: Avg Brier &lt; 0.20 over 100+ predictions.
-                 : Concept: Philip Tetlock's Good Judgment Project.
+  <u>Superforecaster</u>: This project's bar: avg Brier &lt; 0.20 on this scale,
+                 : 100+ predictions.
+                 : The term is Tetlock's; his project scores on a 0-2
+                 : scale and sets no such bar.
 
   <u>Naive baseline</u> : 0.2222 – equal 1/3 to each outcome (H/D/A).
   <u>Betting markets</u>: ~0.19 – wisdom of crowds (aggregated market odds).
@@ -192,7 +207,7 @@ A third each      0.2222                  ┊                 ●
   <u>Avg Brier</u>      : Mean Brier score across all scored predictions.
   <u>Accuracy %</u>     : % where top predicted outcome == actual result.
   <u>Scored</u>         : Result confirmed in TheSportsDB; match played.
-  <u>Colors</u>         : <span class="over">■</span> highlighted &gt; 0.20</pre></figure></div></div></section></article><article data-lang="es"><h1>¿Es Maldini un superpronosticador?</h1><p class="sub">1.500 predicciones de 2022-Q4 a 2026-Q2. Datos finales del 11 de mayo de 2026.</p><p class="intro"><a href="https://www.youtube.com/@mundomaldini" target="_blank" rel="noopener">@mundomaldini</a> es un periodista español de fútbol que publica predicciones semanales. Este informe las puntúa y evalúa con <b>puntuaciones Brier</b> (menor = más preciso). Un <b>superpronosticador</b> puntúa Brier &lt; 0.20. Base aleatoria: 0.2222 (33% cada L/E/V).</p><section class="sec" id="es-verdict"><h2>Veredicto</h2><div class="row"><div class="fig"><figure class="chart"><pre class="drawing"><span class="hl">🔮 <b>¿SUPERPRONOSTICADOR?</b>  <b>[x] SÍ</b>   [ ] NO   (Brier 0.1916 &lt; 0.2)</span>
+  <u>Colors</u>         : <span class="over">■</span> highlighted &gt; 0.20</pre></figure></div></div></section></article><article data-lang="es"><h1>¿Es Maldini un superpronosticador?</h1><p class="sub">1.500 predicciones de 2022-Q4 a 2026-Q2. Datos finales del 11 de mayo de 2026.</p><p class="intro"><a href="https://www.youtube.com/@mundomaldini" target="_blank" rel="noopener">@mundomaldini</a> es un periodista español de fútbol que publica predicciones semanales. Este informe las puntúa y evalúa con <b>puntuaciones Brier</b> (menor = más preciso). Este proyecto llama <b>superpronosticador</b> a quien promedia un Brier por debajo de 0.20 en 100+ predicciones: el término es de Philip Tetlock, el umbral es de este proyecto. Base aleatoria: 0.2222 (33% cada L/E/V).</p><section class="sec" id="es-verdict"><h2>Veredicto</h2><div class="row"><div class="fig"><figure class="chart"><pre class="drawing"><span class="hl">🔮 <b>¿SUPERPRONOSTICADOR?</b>  <b>[x] SÍ</b>   [ ] NO   (Brier 0.1916 &lt; 0.2)</span>
 
 Brier medio, menor es mejor (┊ = 0.20)
 
@@ -205,7 +220,7 @@ Un tercio a cada  0.2222                  ┊                 ●
   Predicciones puntuadas : <b>1.500</b>
   Precisión              : <b>57.0%</b>
   Mejor trimestre        : <b>2023-Q2</b>
-  Peor trimestre         : <b>2023-Q1</b></pre></figure></div><p class="side">Menor es mejor. En 1.500 predicciones puntuadas Maldini promedia 0.1916: por debajo del umbral de superpronosticador (0.20) y al nivel de los mercados de apuestas, en torno a 0.19. Dar un tercio a cada resultado puntúa 0.2222.</p></div></section><section class="sec" id="es-quarters"><h2>Trimestres</h2><div class="row"><div class="fig"><figure class="chart"><pre class="drawing">  0.28 ┤                                                              
+  Peor trimestre         : <b>2023-Q1</b></pre></figure></div><p class="side">Menor es mejor. En 1.500 predicciones puntuadas Maldini promedia 0.1916: por debajo del umbral de 0.20 de este proyecto y al nivel de los mercados de apuestas, en torno a 0.19. Dar un tercio a cada resultado puntúa 0.2222.</p></div></section><section class="sec" id="es-quarters"><h2>Trimestres</h2><div class="row"><div class="fig"><figure class="chart"><pre class="drawing">  0.28 ┤                                                              
   0.26 ┤                                                              
   0.24 ┤      ██                                                      
   0.22 ┤  ██  ██                                                      
@@ -247,12 +262,14 @@ Un tercio a cada  0.2222                  ┊                 ●
   2026-05-01 │ Girona        │ Mallorca      │ 50/30/20 │ A │ <span class="over">0.3267</span>
   2026-05-01 │ Osasuna       │ Barça         │ 20/30/50 │ A │ 0.1267
   2026-05-01 │ Alavés        │ Athletic Club │ 40/30/30 │ A │ <span class="over">0.2467</span></pre><figcaption>Sus últimas 15 predicciones puntuadas.</figcaption></figure></div><p class="side">Un partido suelto dice poco. Atlético–Celta, con un 60% local, acabó en victoria visitante (0.4200); Betis–Oviedo, con un 70% local, lo ganó el local (0.0467). Por eso el veredicto usa la media de las 1.500.</p></div></section><section class="sec" id="es-definitions"><h2>Definiciones</h2><div class="row"><div class="fig"><figure class="chart"><pre class="drawing">  <u>Puntuación Brier</u>: Métrica de precisión probabilística. Menor = mejor.
-                 : Fórmula: (pH-rH)^2 + (pD-rD)^2 + (pA-rA)^2
+                 : Fórmula: ((pH-rH)^2 + (pD-rD)^2 + (pA-rA)^2) / 3
                  : p = prob. predicha; r = 1 si ocurre, 0 si no.
-                 : Rango 0-2. Perfecto = 0. Base aleatoria = 0.2222.
+                 : Rango 0-0.667. Perfecto = 0. Base aleatoria = 0.2222.
 
-  <u>Superpronosticador</u>: Brier medio &lt; 0.20 en 100+ predicciones.
-                 : Concepto: Good Judgment Project (Philip Tetlock).
+  <u>Superpronosticador</u>: Umbral de este proyecto: Brier medio &lt; 0.20
+                 : en esta escala, en 100+ predicciones.
+                 : El término es de Tetlock; su proyecto puntúa en una
+                 : escala 0-2 y no fija ese umbral.
 
   <u>Base aleatoria</u> : 0.2222 – 1/3 igual a cada resultado (L/E/V).
   <u>Mercados apuestas</u>: ~0.19 – sabiduría colectiva (cuotas de mercado).
@@ -260,7 +277,7 @@ Un tercio a cada  0.2222                  ┊                 ●
   <u>Brier medio</u>    : Brier medio sobre todas las predicciones puntuadas.
   <u>Precisión %</u>    : % donde el resultado más probable coincide con real.
   <u>Puntuada</u>       : Resultado confirmado en TheSportsDB; partido jugado.
-  <u>Colores</u>        : <span class="over">■</span> highlighted &gt; 0.20</pre></figure></div></div></section></article></main><footer><p><span data-lang="en">If you are an agent, read <a target="_blank" rel="noopener" href="/llms.txt">/llms.txt</a></span><span data-lang="es">Si eres un agente, lee <a target="_blank" rel="noopener" href="/llms.txt">/llms.txt</a></span></p><p>© 2026 0trm</p></footer></div></div>
+  <u>Colores</u>        : <span class="over">■</span> resaltado &gt; 0.20</pre></figure></div></div></section></article></main><footer><p><span data-lang="en">If you are an agent, read <a target="_blank" rel="noopener" href="/llms.txt">/llms.txt</a></span><span data-lang="es">Si eres un agente, lee <a target="_blank" rel="noopener" href="/llms.txt">/llms.txt</a></span></p><p>© 2026 Tomás Ravalli</p></footer></div></div>
 
 <script>
 (function () {
@@ -269,7 +286,7 @@ Un tercio a cada  0.2222                  ┊                 ●
     b.addEventListener("click", function () {
       var next = (root.dataset.theme || (mq.matches ? "dark" : "light")) === "dark" ? "light" : "dark";
       root.dataset.theme = next;
-      try { localStorage.setItem("maldini-theme", next); } catch (e) {}
+      try { localStorage.setItem("0trm-theme", next); } catch (e) {}
     });
   });
   document.querySelectorAll("button.lang").forEach(function (b) {
@@ -290,7 +307,7 @@ Un tercio a cada  0.2222                  ┊                 ●
   var marked = null, queued = false;
   function mark() {
     queued = false;
-    var line = innerHeight / 5, current = null;
+    var left = document.documentElement.scrollHeight - innerHeight - scrollY, line = innerHeight / 5 + Math.max(0, innerHeight * .8 - left), current = null;
     document.querySelectorAll('article[data-lang="' + root.lang + '"] section[id]').forEach(function (s) { if (s.getBoundingClientRect().top <= line) current = s; });
     var a = current && links[current.id];
     if (a === marked) return;

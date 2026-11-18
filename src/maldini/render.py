@@ -199,8 +199,10 @@ def build_translations(avg_brier, std_brier, fmt):
             "header": [
                 "@mundomaldini is a Spanish football journalist who publishes",
                 "weekly match predictions on YouTube. Predictions are evaluated",
-                f'with {fmt.bold("Brier scores")} (lower = more accurate). A {fmt.bold("superforecaster")}',
-                f"scores Brier {lt} 0.20. Naive baseline: 0.2222 (33% each H/D/A).",
+                f'with {fmt.bold("Brier scores")} (lower = more accurate). This project calls',
+                f'a forecaster a {fmt.bold("superforecaster")} below an average Brier of 0.20',
+                "over 100+ predictions: the term is Philip Tetlock's, the bar is this",
+                "project's. Naive baseline: 0.2222 (33% each H/D/A).",
             ],
             "sf_yes": (
                 f'\U0001f3c6 {fmt.bold("SUPERFORECASTER?")}  {fmt.bold("[x] YES")}   [ ] no'
@@ -234,12 +236,14 @@ def build_translations(avg_brier, std_brier, fmt):
             "def_title":   "Definitions",
             "def_rows": [
                 ("Brier score",    "Probabilistic accuracy metric. Lower = better."),
-                ("",               "Formula: (pH-rH)^2 + (pD-rD)^2 + (pA-rA)^2"),
+                ("",               "Formula: ((pH-rH)^2 + (pD-rD)^2 + (pA-rA)^2) / 3"),
                 ("",               "p = predicted prob.; r = 1 if outcome, 0 if not."),
-                ("",               "Range 0-2. Perfect = 0. Naive baseline = 0.2222."),
+                ("",               "Range 0-0.667. Perfect = 0. Naive baseline = 0.2222."),
                 None,
-                ("Superforecaster", f"Avg Brier {lt} 0.20 over 100+ predictions."),
-                ("",               "Concept: Philip Tetlock's Good Judgment Project."),
+                ("Superforecaster", f"This project's bar: avg Brier {lt} 0.20 on this scale,"),
+                ("",               "100+ predictions."),
+                ("",               "The term is Tetlock's; his project scores on a 0-2"),
+                ("",               "scale and sets no such bar."),
                 None,
                 ("Naive baseline",  "0.2222 -- equal 1/3 to each outcome (H/D/A)."),
                 ("Betting markets", "~0.19 -- wisdom of crowds (aggregated market odds)."),
@@ -260,8 +264,10 @@ def build_translations(avg_brier, std_brier, fmt):
             "header": [
                 "@mundomaldini es un periodista español de fútbol que publica",
                 f"predicciones semanales en YouTube. Se evalúan con {fmt.bold('puntuaciones')}",
-                f'{fmt.bold("Brier")} (menor = más preciso). Un {fmt.bold("superpronosticador")} puntúa',
-                f"Brier {lt} 0.20. Base aleatoria: 0.2222 (33% cada L/E/V).",
+                f'{fmt.bold("Brier")} (menor = más preciso). Este proyecto llama',
+                f'{fmt.bold("superpronosticador")} a quien promedia un Brier por debajo de 0.20',
+                "en 100+ predicciones: el término es de Philip Tetlock, el umbral es de",
+                "este proyecto. Base aleatoria: 0.2222 (33% cada L/E/V).",
             ],
             "sf_yes": (
                 f'\U0001f3c6 {fmt.bold("¿SUPERPRONOSTICADOR?")}  {fmt.bold("[x] SÍ")}   [ ] no'
@@ -295,12 +301,14 @@ def build_translations(avg_brier, std_brier, fmt):
             "def_title":   "Definiciones",
             "def_rows": [
                 ("Puntuación Brier",  "Métrica de precisión probabilística. Menor = mejor."),
-                ("",                  "Fórmula: (pH-rH)^2 + (pD-rD)^2 + (pA-rA)^2"),
+                ("",                  "Fórmula: ((pH-rH)^2 + (pD-rD)^2 + (pA-rA)^2) / 3"),
                 ("",                  "p = prob. predicha; r = 1 si ocurre, 0 si no."),
-                ("",                  "Rango 0-2. Perfecto = 0. Base aleatoria = 0.2222."),
+                ("",                  "Rango 0-0.667. Perfecto = 0. Base aleatoria = 0.2222."),
                 None,
-                ("Superpronosticador", f"Brier medio {lt} 0.20 en 100+ predicciones."),
-                ("",                  "Concepto: Good Judgment Project (Philip Tetlock)."),
+                ("Superpronosticador", f"Umbral de este proyecto: Brier medio {lt} 0.20"),
+                ("",                  "en esta escala, en 100+ predicciones."),
+                ("",                  "El término es de Tetlock; su proyecto puntúa en una"),
+                ("",                  "escala 0-2 y no fija ese umbral."),
                 None,
                 ("Base aleatoria",    "0.2222 -- 1/3 igual a cada resultado (L/E/V)."),
                 ("Mercados apuestas", "~0.19 -- sabiduría colectiva (cuotas de mercado)."),
