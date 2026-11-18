@@ -16,10 +16,10 @@ A Brier score measures the accuracy of probabilistic predictions – **lower is 
 |---|---|
 | Naive baseline (guess 1/3 each outcome) | 0.222 |
 | Betting markets | ~0.19 |
-| **Superforecaster threshold** | **< 0.20** |
+| **This project's bar** | **< 0.20** |
 | Perfect forecaster | 0.00 |
 
-Maldini earns the superforecaster badge only when his all-time average Brier score drops below 0.20 – and only once he has 100+ scored predictions for statistical reliability. 
+By this project's bar, Maldini counts as a superforecaster only when his all-time average Brier score drops below 0.20, and only once he has 100+ scored predictions for statistical reliability. The term is Philip Tetlock's; the 0.20 bar is this project's, not his. 
 
 > The project tracks **1,500 predictions** from 2022-Q4 to 2026-Q2. Final data from 11 May 2026.
 
@@ -72,7 +72,7 @@ Schedule: manual. .github/workflows/weekly.yml runs on workflow_dispatch;
 its Sunday 08:00 UTC cron is switched off.
 ```
 
-**Parquet is the single source of truth.** It lives in git, so every dashboard build is reproducible from a commit hash. The pipeline is idempotent – re-running it on the same `videos.csv` only processes new `video_id`s, and pending predictions (matches not yet played) are persisted with null results so the next run picks them up.
+**Parquet is the single source of truth.** It is not published here; the page in `docs/stats.html` is the final snapshot built from it. The pipeline is idempotent – re-running it on the same `videos.csv` only processes new `video_id`s, and pending predictions (matches not yet played) are persisted with null results so the next run picks them up.
 
 ---
 
@@ -95,12 +95,12 @@ Summary statistics (all-time average, accuracy, monthly trend, competition break
 |---|---|
 | Pipeline | Python package (`src/maldini/`) |
 | Transformations | DuckDB (in-process SQL) |
-| Storage | Parquet file in git (`data/predictions.parquet`) |
+| Storage | Parquet file, kept locally (`data/predictions.parquet`) |
 | LLM | Anthropic Claude Haiku |
 | External APIs | YouTube Data API v3, youtube-transcript-api, TheSportsDB |
 | Dashboard | Jinja2 → static HTML in `dist/`; the published page is the final snapshot, styled like [0trm.dev](https://0trm.dev) |
 | Schedule | GitHub Actions, manual trigger (weekly cron switched off) |
-| Hosting | GitHub Pages, serving `docs/` (the final May 2026 snapshot in `docs/stats.html`) |
+| Hosting | GitHub Pages, serving `docs/` (the final May 2026 snapshot in `docs/stats.html`, edited by hand since commit `1f3ce41`: changes to the published page go there, not into the renderer) |
 | CI | GitHub Actions runs `pytest` on every push |
 
 ---
@@ -140,7 +140,7 @@ To add new videos: append rows to `data/videos.csv` and re-run.
 
 ## Design notes
 
-- **Parquet lives in git** – every dashboard build is reproducible from a commit hash. If scoring logic changes, rebuild from `data/videos.csv`.
+- **The parquet is the single source of truth** – a build is reproducible from it. If scoring logic changes, rebuild from `data/videos.csv`.
 - **DuckDB for everything SQL** – no warehouse, no credentials, no quotas; the whole pipeline runs on a laptop or a free-tier GitHub Actions runner in under a minute.
 - **Fuzzy team matching** – normalisation strips accents, common prefixes (`Real`, `Atlético`), and applies Spanish→English word substitutions before substring matching against TheSportsDB results.
 - **No-date window** – predictions without a `match_date` use a 45-day window from `publish_date` to find the matching fixture.
